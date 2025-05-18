@@ -56,6 +56,7 @@
     }
     .login-box {
       text-align: center;
+      background: white;
       margin-top: 5rem;
     }
     @keyframes fadeIn {
@@ -103,9 +104,6 @@
 
   <div class="login-box" id="loginBox">
     <h3>Sign In</h3>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="login()">Login</button>
     <script>
       function handleGoogleLogin(response) {
         const data = jwt_decode(response.credential);
