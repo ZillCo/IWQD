@@ -163,7 +163,7 @@
 
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       try {
-        const res = await fetch(`http://localhost:3000/api/latest/${pin}?user=${currentUser}`);
+        const res = await fetch(`https://iwqd.onrender.com${pin}?user=${currentUser}`);
         const { value } = await res.json();
         const val = parseFloat(value);
         const now = new Date().toLocaleTimeString();
@@ -193,7 +193,7 @@
     }
 
     async function loadHistory() {
-      const res = await fetch(`http://localhost:3000/api/history?user=${currentUser}`);
+      const res = await fetch(`https://iwqd.onrender.com?user=${currentUser}`);
       const history = await res.json();
       const list = document.getElementById("historyList");
       list.innerHTML = "";
