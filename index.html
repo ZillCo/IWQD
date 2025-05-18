@@ -159,15 +159,24 @@
 
     <div class="sensor-box">
       <h3>History</h3>
-      <button onclick="loadHistory()">View History</button>
+      <button onclick="openHistoryModal()">View History</button>
       <ul id="historyList"></ul>
     </div>
-    
   </div>
+  
+  <div class="modal" id="historyModal">
+    <div class="modal-content">
+      <h3>Sensor History</h3>
+      <ul id="historyList"></ul>
+      <button onclick="closeHistoryModal()">Close</button>
+    </div>
+  </div>
+  
   <script>
-    let currentUser = null;
+    let currentUser = null;  
     let darkMode = false;
     let chartType = 'line';
+    
     const endpoints = [
       { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
       { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
@@ -282,6 +291,14 @@
         fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
       });
     }
+    function openHistoryModal() {
+      document.getElementById("historyModal").classList.add("show");
+      loadHistory();
+    }
+
+    function closeHistoryModal() {
+      document.getElementById("historyModal").classList.remove("show");
+    }
     async function loadHistory() {
       const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
       const history = await res.json();
@@ -289,7 +306,7 @@
       list.innerHTML = "";
       history.forEach(entry => {
         const li = document.createElement("li");
-        li.textContent = `${new Date(entry.timestamp).toLocaleString()} - ${entry.parameter}: ${entry.value}`;
+        li.textContent = `${new Date(entry.timestamp).toLocaleString()} — ${entry.parameter || entry.pin}: ${entry.value}`;
         list.appendChild(li);
       });
     }
