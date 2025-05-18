@@ -103,7 +103,17 @@
   </style>
 </head>
 <body>
-  <h1>IoT Water Quality Dashboard</h1>
+  <header>
+    <h1>IoT Water Quality Dashboard</h1>
+    <div>
+      <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
+      <div id="menuPanel" class="menu-panel">
+        <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
+        <button onclick="toggleGraphType()">📊 Switch Chart Type</button><br>
+        <button onclick="logout()">🔓 Logout</button>
+      </div>
+    </div>
+  </header>
 
   <div class="login-box" id="loginBox">
     <h3>Sign In</h3>
