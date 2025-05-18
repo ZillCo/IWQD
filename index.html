@@ -163,15 +163,6 @@
       <ul id="historyList"></ul>
     </div>
   </div>
-  
-  <div class="modal" id="historyModal">
-    <div class="modal-content">
-      <h3>Sensor History</h3>
-      <ul id="historyList"></ul>
-      <button onclick="closeHistoryModal()">Close</button>
-    </div>
-  </div>
-  
   <script>
     let currentUser = null;  
     let darkMode = false;
@@ -290,14 +281,6 @@
       endpoints.forEach(({ pin, chartId, statusId, safe }) => {
         fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
       });
-    }
-    function openHistoryModal() {
-      document.getElementById("historyModal").classList.add("show");
-      loadHistory();
-    }
-
-    function closeHistoryModal() {
-      document.getElementById("historyModal").classList.remove("show");
     }
     async function loadHistory() {
       const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
