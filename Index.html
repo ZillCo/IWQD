@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IoT Water Quality Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #0066cc;
+      margin-bottom: 1rem;
+    }
+    .sensor-box, .login-box {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    canvas {
+      margin-bottom: 1rem;
+      max-width: 100%;
+    }
+    .hidden {
+      display: none;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>IoT Water Quality Dashboard</h1>
+
+  <div class="login-box" id="loginBox">
+    <h3>Sign In</h3>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <div id="g_id_onload"
+         data-client_id="YOUR_GOOGLE_CLIENT_ID"
+         data-callback="handleGoogleLogin">
+    </div>
+    <div class="g_id_signin" data-type="standard"></div>
+    <p id="loginMessage"></p>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <p>Logged in as <strong id="userDisplay"></strong> | <button onclick="logout()">Logout</button></p>
+
+    <div class="sensor-box">
+      <h3>pH Level</h3>
+      <canvas id="phChart"></canvas>
+      Status: <span id="phStatus">Loading...</span>
+    </div>
+
+    <div class="sensor-box">
+      <h3>Temperature (°C)</h3>
+      <canvas id="tempChart"></canvas>
+      Status: <span id="tempStatus">Loading...</span>
+    </div>
+
+    <div class="sensor-box">
+      <h3>Turbidity (NTU)</h3>
+      <canvas id="turbChart"></canvas>
+      Status: <span id="turbStatus">Loading...</span>
+    </div>
+
+    <div class="sensor-box">
+      <h3>Total Dissolved Solids (mg/L)</h3>
+      <canvas id="tdsChart"></canvas>
+      Status: <span id="tdsStatus">Loading...</span>
+    </div>
+
+    <div class="sensor-box">
+      <h3>Dissolved Oxygen (mg/L)</h3>
+      <canvas id="doChart"></canvas>
+      Status: <span id="doStatus">Loading...</span>
+    </div>
+
+    <div class="sensor-box">
+      <h3>History</h3>
+      <button onclick="loadHistory()">View History</button>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    const endpoints = [
+      { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
+      { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
+      { pin: "v3", chartId: "turbChart", statusId: "turbStatus", label: "Turbidity (NTU)", safe: [0, 1.5], maxY: 5 },
+      { pin: "v4", chartId: "tdsChart", statusId: "tdsStatus", label: "TDS (mg/L)", safe: [0, 500], maxY: 1000 },
+      { pin: "v5", chartId: "doChart", statusId: "doStatus", label: "DO (mg/L)", safe: [6.5, 8], maxY: 14 },
+    ];
+
+    const charts = {};
+
+    endpoints.forEach(sensor => {
+      const ctx = document.getElementById(sensor.chartId).getContext("2d");
+      charts[sensor.pin] = new Chart(ctx, {
+        type: "line",
+        data: { labels: [], datasets: [{ label: sensor.label, data: [], borderColor: "blue", fill: false }] },
+        options: { scales: { y: { min: 0, max: sensor.maxY } } }
+      });
+    });
+
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      if (user === "admin" && pass === "1234") {
+        initDashboard(user);
+      } else {
+        document.getElementById("loginMessage").textContent = "Invalid credentials.";
+      }
+    }
+
+    function handleGoogleLogin(response) {
+      const data = jwt_decode(response.credential);
+      initDashboard(data.email);
+    }
+
+    function initDashboard(user) {
+      currentUser = user;
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("dashboard").classList.remove("hidden");
+      document.getElementById("userDisplay").textContent = user;
+      updateCharts();
+      setInterval(updateCharts, 10000);
+    }
+
+    function logout() {
+      currentUser = null;
+      document.getElementById("dashboard").classList.add("hidden");
+      document.getElementById("loginBox").classList.remove("hidden");
+    }
+
+    async function fetchSensor(pin, chart, statusEl, safeRange) {
+      try {
+        const res = await fetch(`http://localhost:3000/api/latest/${pin}?user=${currentUser}`);
+        const { value } = await res.json();
+        const val = parseFloat(value);
+        const now = new Date().toLocaleTimeString();
+
+        if (chart.data.labels.length > 10) {
+          chart.data.labels.shift();
+          chart.data.datasets[0].data.shift();
+        }
+
+        chart.data.labels.push(now);
+        chart.data.datasets[0].data.push(val);
+        chart.update();
+
+        statusEl.textContent = val >= safeRange[0] && val <= safeRange[1] ? "Safe ✅" : "Unsafe ⚠️";
+        statusEl.style.color = val >= safeRange[0] && val <= safeRange[1] ? "green" : "red";
+
+      } catch (err) {
+        statusEl.textContent = "Error ❌";
+        statusEl.style.color = "gray";
+      }
+    }
+
+    function updateCharts() {
+      endpoints.forEach(({ pin, chartId, statusId, safe }) => {
+        fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
+      });
+    }
+
+    async function loadHistory() {
+      const res = await fetch(`http://localhost:3000/api/history?user=${currentUser}`);
+      const history = await res.json();
+      const list = document.getElementById("historyList");
+      list.innerHTML = "";
+      history.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${new Date(entry.timestamp).toLocaleString()} - ${entry.parameter}: ${entry.value}`;
+        list.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
