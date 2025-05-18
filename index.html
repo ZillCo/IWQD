@@ -110,7 +110,6 @@
         <div id="menuPanel" class="menu-panel">
           <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
           <button onclick="toggleGraphType()">📊 Switch Chart Type</button><br>
-          <button onclick="returnToLineChart()">📈 Switch Line Chart</button><br>
           <button onclick="logout()">🔓 Logout</button>
         </div>
       </div>
@@ -215,19 +214,6 @@
         const chart = charts[sensor.pin];
         chart.config.type = chartType;
         chart.update();
-      });
-    }
-    function toggleGraphType(type) {
-      chartType = type;
-      chartIds.forEach(id => {
-        const ctx = document.getElementById(id).getContext("2d");
-        const oldChart = charts[id];
-        if (oldChart) oldChart.destroy();
-        charts[id] = new Chart(ctx, {
-          type: chartType,
-          data: oldChart.data,
-          options: oldChart.options
-        });
       });
     }
     function login() {
