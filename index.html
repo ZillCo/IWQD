@@ -283,7 +283,7 @@
       });
     }
     async function loadHistory() {
-      const res = await fetch(`https://iwqd.onrender.com?user=${currentUser}`);
+      const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
       const history = await res.json();
       const list = document.getElementById("historyList");
       list.innerHTML = "";
