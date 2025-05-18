@@ -238,7 +238,7 @@
       document.getElementById("userDisplay").textContent = user;
       updateCharts();
       setInterval(updateCharts, 10000);
-      fetch("https://iwqd.onrender.com", {
+      fetch("https://iwqd.onrender.com/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user)
