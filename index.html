@@ -108,19 +108,16 @@
 <body>
   <div class="login-box" id="loginBox">
     <h3>Sign In With Google</h3>
-    <script>
-      function handleGoogleLogin(response) {
-        const data = jwt_decode(response.credential);
-        const user = data.email || data.name || "guest";
-    // Store the user
-    currentUser = user;
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-    document.getElementById("userDisplay").textContent = user;
-    updateCharts();
-    setInterval(updateCharts, 10000);
-  }
-</script>
+    <div class="g_id_signin" data-type="standard"></div>
+    <p id="loginMessage"></p>
+    <div text-align="center"
+         id="g_id_onload"
+         data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
+         data-callback="handleGoogleLogin"></div>
+    <div class="g_id_signin" data-type="standard"></div>
+  </div>
+  
+   <div id="dashboard" class="hidden">
     <header>
       <h1>IoT Water Dashboard</h1>
       <div>
@@ -133,18 +130,18 @@
       </div>
     </header>
     <p>Welcome, <strong id="userDisplay"></strong></p>
-    <div text-align="center"
-         id="g_id_onload"
-         data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
-         data-callback="handleGoogleLogin">
+     
+     <div class="report-box">
+      <h3>My Report</h3>
+      <ul id="summaryStats">
+        <li><strong>Average pH:</strong> <span id="avgPh">-</span></li>
+        <li><strong>Average Temp (°C):</strong> <span id="avgTemp">-</span></li>
+        <li><strong>Average Turbidity:</strong> <span id="avgTurb">-</span></li>
+        <li><strong>Average TDS:</strong> <span id="avgTds">-</span></li>
+        <li><strong>Average DO:</strong> <span id="avgDo">-</span></li>
+      </ul>
     </div>
-    <div class="g_id_signin" data-type="standard"></div>
-    <p id="loginMessage"></p>
-  </div>
-
-  <div id="dashboard" class="hidden">
-    <p text-align="center">Logged in as <strong id="userDisplay"></strong> | <button onclick="logout()">Logout</button></p>
-
+     
     <div class="sensor-box">
       <h3>pH Level</h3>
       <canvas id="phChart"></canvas>
@@ -180,16 +177,7 @@
       <button onclick="loadHistory()">View History</button>
       <ul id="historyList"></ul>
     </div>
-    <div class="report-box">
-      <h3>My Report</h3>
-      <ul id="summaryStats">
-        <li><strong>Average pH:</strong> <span id="avgPh">-</span></li>
-        <li><strong>Average Temp (°C):</strong> <span id="avgTemp">-</span></li>
-        <li><strong>Average Turbidity:</strong> <span id="avgTurb">-</span></li>
-        <li><strong>Average TDS:</strong> <span id="avgTds">-</span></li>
-        <li><strong>Average DO:</strong> <span id="avgDo">-</span></li>
-      </ul>
-    </div>
+    
   </div>
   <script>
     let currentUser = null;
@@ -214,7 +202,17 @@
         options: { scales: { y: { min: 0, max: sensor.maxY } } }
       });
     });
-    
+      function handleGoogleLogin(response) {
+        const data = jwt_decode(response.credential);
+        const user = data.email || data.name || "guest";
+    // Store the user
+    currentUser = user;
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+    document.getElementById("userDisplay").textContent = user;
+    updateCharts();
+    setInterval(updateCharts, 10000);
+  }
     function toggleMenu() {
       document.getElementById("menuPanel").classList.toggle("active");
     }
