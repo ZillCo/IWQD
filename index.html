@@ -208,7 +208,15 @@
       document.body.classList.toggle('dark-mode');
       document.body.style.background = darkMode ? '#121212' : '#f7f7f7';
       document.body.style.color = darkMode ? 'white' : 'black';
-    }   
+    }
+    function toggleGraphType() {
+      chartType = chartType === 'line' ? 'bar' : 'line';
+      endpoints.forEach(sensor => {
+        const chart = charts[sensor.pin];
+        chart.config.type = chartType;
+        chart.update();
+      });
+    }
     function toggleGraphType(type) {
       chartType = type;
       chartIds.forEach(id => {
