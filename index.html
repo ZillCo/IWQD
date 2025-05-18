@@ -50,21 +50,21 @@
       display: block;
       animation: fadeIn 0.3s ease-in-out;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     h1 {
       text-align: center;
       color: #0066cc;
       margin-bottom: 1rem;
     }
-    .login-box {
+    .login-box .g_id_signin {
       text-align: center;
       background: white;
-      margin-left: 2rem;
-      margin-right: 2rem;
+      margin-left: 10rem;
+      margin-right: 10rem;
       margin-top: 5rem;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
    .sensor-box, .report-box {
       background: white;
@@ -74,6 +74,9 @@
       max-width: 700px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: transform 0.3s ease;
+    }
+     .sensor-box:hover, .report-box:hover {
+      transform: translateY(-5px);
     }
     canvas {
       margin-bottom: 1rem;
@@ -103,20 +106,8 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>IoT Water Quality Dashboard</h1>
-    <div>
-      <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
-      <div id="menuPanel" class="menu-panel">
-        <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
-        <button onclick="toggleGraphType()">📊 Switch Chart Type</button><br>
-        <button onclick="logout()">🔓 Logout</button>
-      </div>
-    </div>
-  </header>
-
   <div class="login-box" id="loginBox">
-    <h3>Sign In</h3>
+    <h3>Sign In With Google</h3>
     <script>
       function handleGoogleLogin(response) {
         const data = jwt_decode(response.credential);
@@ -126,11 +117,22 @@
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
     document.getElementById("userDisplay").textContent = user;
-
     updateCharts();
     setInterval(updateCharts, 10000);
   }
 </script>
+    <header>
+      <h1>IoT Water Dashboard</h1>
+      <div>
+        <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
+        <div id="menuPanel" class="menu-panel">
+          <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
+          <button onclick="toggleGraphType()">📊 Switch Chart Type</button><br>
+          <button onclick="logout()">🔓 Logout</button>
+        </div>
+      </div>
+    </header>
+    <p>Welcome, <strong id="userDisplay"></strong></p>
     <div text-align="center"
          id="g_id_onload"
          data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
@@ -141,7 +143,7 @@
   </div>
 
   <div id="dashboard" class="hidden">
-    <p>Logged in as <strong id="userDisplay"></strong> | <button onclick="logout()">Logout</button></p>
+    <p text-align="center">Logged in as <strong id="userDisplay"></strong> | <button onclick="logout()">Logout</button></p>
 
     <div class="sensor-box">
       <h3>pH Level</h3>
@@ -178,11 +180,21 @@
       <button onclick="loadHistory()">View History</button>
       <ul id="historyList"></ul>
     </div>
+    <div class="report-box">
+      <h3>My Report</h3>
+      <ul id="summaryStats">
+        <li><strong>Average pH:</strong> <span id="avgPh">-</span></li>
+        <li><strong>Average Temp (°C):</strong> <span id="avgTemp">-</span></li>
+        <li><strong>Average Turbidity:</strong> <span id="avgTurb">-</span></li>
+        <li><strong>Average TDS:</strong> <span id="avgTds">-</span></li>
+        <li><strong>Average DO:</strong> <span id="avgDo">-</span></li>
+      </ul>
+    </div>
   </div>
-
   <script>
     let currentUser = null;
-
+    let darkMode = false;
+    let chartType = 'line';
     const endpoints = [
       { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
       { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
@@ -192,7 +204,8 @@
     ];
 
     const charts = {};
-
+    const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
+    
     endpoints.forEach(sensor => {
       const ctx = document.getElementById(sensor.chartId).getContext("2d");
       charts[sensor.pin] = new Chart(ctx, {
@@ -201,7 +214,25 @@
         options: { scales: { y: { min: 0, max: sensor.maxY } } }
       });
     });
+    
+    function toggleMenu() {
+      document.getElementById("menuPanel").classList.toggle("active");
+    }
 
+    function toggleDarkMode() {
+      darkMode = !darkMode;
+      document.body.style.background = darkMode ? '#121212' : '#f7f7f7';
+      document.body.style.color = darkMode ? 'white' : 'black';
+    }
+
+    function toggleGraphType() {
+      chartType = chartType === 'line' ? 'bar' : 'line';
+      endpoints.forEach(sensor => {
+        const chart = charts[sensor.pin];
+        chart.config.type = chartType;
+        chart.update();
+      });
+    }
     function login() {
       const user = document.getElementById("username").value;
       const pass = document.getElementById("password").value;
@@ -224,6 +255,11 @@
       document.getElementById("userDisplay").textContent = user;
       updateCharts();
       setInterval(updateCharts, 10000);
+      fetch("https://iwqd.onrender.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user)
+      });
     }
 
     function logout() {
@@ -247,22 +283,22 @@
         chart.data.labels.push(now);
         chart.data.datasets[0].data.push(val);
         chart.update();
-
+        averages[pin].push(val);
+        if (averages[pin].length > 20) averages[pin].shift();
         statusEl.textContent = val >= safeRange[0] && val <= safeRange[1] ? "Safe ✅" : "Unsafe ⚠️";
         statusEl.style.color = val >= safeRange[0] && val <= safeRange[1] ? "green" : "red";
-
+        
+        updateReport();
       } catch (err) {
         statusEl.textContent = "Error ❌";
         statusEl.style.color = "gray";
       }
     }
-
     function updateCharts() {
       endpoints.forEach(({ pin, chartId, statusId, safe }) => {
         fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
       });
     }
-
     async function loadHistory() {
       const res = await fetch(`https://iwqd.onrender.com?user=${currentUser}`);
       const history = await res.json();
