@@ -28,7 +28,7 @@ const SensorData = mongoose.model('SensorData', {
 app.use(cors());
 
 // Get latest sensor value
-app.get('https://iwqd.onrender.com/api/latest/:pin', async (req, res) => {
+app.get('https://blynk.cloud/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
   const user = req.query.user || 'default';
 
@@ -46,7 +46,7 @@ app.get('https://iwqd.onrender.com/api/latest/:pin', async (req, res) => {
 });
 
 // Get full history by user
-app.get('https://iwqd.onrender.com/api/history', async (req, res) => {
+app.get('https://blynk.cloud/api/history', async (req, res) => {
   const user = req.query.user || 'default';
   const history = await SensorData.find({ user }).sort({ timestamp: -1 }).limit(100);
   res.json(history);
