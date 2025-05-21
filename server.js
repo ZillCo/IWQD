@@ -45,6 +45,26 @@ app.get('https://blynk.cloud/api/latest/:pin', async (req, res) => {
     res.status(500).json({ error: 'Failed to get or save sensor data', detail: err.message });
   }
 });
+app.get('/api/latest-data', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+
+  const latest = await SensorData.findOne().sort({ timestamp: -1 });
+
+  if (!latest) return res.status(404).json({ message: 'No data' });
+
+  // Example logic
+  const isSafe =
+    latest.pH >= 6.5 && latest.pH <= 8.5 &&
+    latest.temperature >= 20 && latest.temperature <= 35 &&
+    latest.turbidity <= 5 &&
+    latest.tds <= 500;
+
+  res.json({
+    ...latest.toObject(),
+    status: isSafe ? 'Safe' : 'Unsafe'
+  });
+});
+
 app.use(session({
   secret: 'your-secret-key',
   resave: false,
