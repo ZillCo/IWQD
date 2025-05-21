@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const session = require('express-session');
 const mongoose = require('mongoose');
 
 const app = express();
@@ -44,6 +45,34 @@ app.get('https://blynk.cloud/api/latest/:pin', async (req, res) => {
     res.status(500).json({ error: 'Failed to get or save sensor data', detail: err.message });
   }
 });
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: 'your_mongo_connection_url',
+    collectionName: 'sessions'
+  }),
+  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
+}));
+app.post('/auth/google', async (req, res) => {
+  const { name, email, picture } = req.body;
+
+  if (!email) return res.status(400).json({ message: 'Missing email' });
+
+  let user = await User.findOne({ email });
+  if (!user) user = await User.create({ name, email, picture });
+
+  req.session.user = {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    picture: user.picture
+  };
+
+  res.json({ message: 'Login successful' });
+});
+
 
 // Get full history by user
 app.get('https://blynk.cloud/api/history', async (req, res) => {
