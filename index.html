@@ -293,6 +293,18 @@
         list.appendChild(li);
       });
     }
+  window.onload = async () => {
+    const res = await fetch('/api/check-auth');
+    const data = await res.json();
+
+    if (data.isAuthenticated) {
+      // User is logged in, redirect to dashboard
+      window.location.href = 'dashboard.html';
+    } else {
+      // Show Google Sign-In button
+      document.getElementById('login-container').style.display = 'block';
+    }
+  };
   </script>
 </body>
 </html>
