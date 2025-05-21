@@ -295,37 +295,29 @@
         list.appendChild(li);
       });
     }
-  window.onload = async () => {
-    const res = await fetch('/api/check-auth');
-    const data = await res.json();
+window.onload = async () => {
+  const authRes = await fetch('/api/check-auth');
+  const authData = await authRes.json();
 
-    if (data.isAuthenticated) {
-      // User is logged in, redirect to dashboard
-      window.location.href = 'dashboard.html';
-    } else {
-      // Show Google Sign-In button
-      document.getElementById('login-container').style.display = 'block';
-    }
-  };
-    async function loadLatestData() {
-    const res = await fetch('/api/latest-data');
-    const data = await res.json();
-
-    document.getElementById('ph-value').textContent = data.pH;
-    document.getElementById('temp-value').textContent = data.temperature;
-    document.getElementById('turb-value').textContent = data.turbidity;
-    document.getElementById('tds-value').textContent = data.tds;
-
-    const statusEl = document.getElementById('status-value');
-    statusEl.textContent = data.status;
-
-    if (data.status === 'Safe') {
-      statusEl.style.color = 'green';
-    } else {
-      statusEl.style.color = 'red';
-    }
+  if (authData.isAuthenticated) {
+    window.location.href = 'dashboard.html';
+  } else {
+    document.getElementById('login-container').style.display = 'block';
   }
 
+  // Load latest sensor data
+  const dataRes = await fetch('/api/latest-data');
+  const data = await dataRes.json();
+
+  document.getElementById('ph-value').textContent = data.pH;
+  document.getElementById('temp-value').textContent = data.temperature;
+  document.getElementById('turb-value').textContent = data.turbidity;
+  document.getElementById('tds-value').textContent = data.tds;
+
+  const statusEl = document.getElementById('status-value');
+  statusEl.textContent = data.status;
+  statusEl.style.color = data.status === 'Safe' ? 'green' : 'red';
+};
   window.onload = loadLatestData;
 
   </script>
