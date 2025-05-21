@@ -30,14 +30,6 @@ const SensorData = mongoose.model('SensorData', {
   timestamp: Date
 });
 
-// Schema
-const SensorData = mongoose.model('SensorData', {
-  user: String,
-  pin: String,
-  value: String,
-  timestamp: Date
-});
-
 app.use(cors());
 app.use(express.json());
 
