@@ -173,6 +173,25 @@
 
   <script>
     let currentUser = null;
+    function handleGoogleLogin(response) {
+    const data = jwt_decode(response.credential);
+    currentUser = {
+      email: data.email,
+      name: data.name,
+      picture: data.picture
+    };
+
+    // Show dashboard, hide login
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    // Set user display
+    document.getElementById("userDisplay").textContent = currentUser.name || currentUser.email;
+
+    // You can also preload data or start polling here
+    updateCharts(); // if you have it
+  }
+
 
     function openHistoryModal() {
       document.getElementById("historyModal").classList.add("show");
