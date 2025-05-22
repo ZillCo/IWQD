@@ -7,8 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Load environment variables
-const MONGO_URL = process.env.MONGO_URL;
-const BLYNK_TOKEN = process.env.BLYNK_TOKEN;
+const MONGO_URL = process.env.mongodb://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/iotdb?retryWrites=true&w=majority&appName=Cluster0;
+const BLYNK_TOKEN = process.env.oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc;
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
 // Connect to MongoDB
