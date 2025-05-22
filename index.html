@@ -96,7 +96,7 @@
     <div>
       <h3 text-align="center">Sign In With Google</h3>
       <div id="g_id_onload"
-         data-client_id="1082316602730-qj28n22p7peebnsqpq7g1g5r125uujnn.apps.googleusercontent.com"
+         data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
          data-callback="handleGoogleLogin"></div>
       <div class="g_id_signin" data-type="standard"></div>
     </div>
@@ -229,7 +229,6 @@
     }
 
     function handleGoogleLogin(response) {
-      console.log("Google login triggered:", response); // <-- Add this
       const data = jwt_decode(response.credential);
       initDashboard(data.email);
     }
@@ -254,33 +253,18 @@
       document.getElementById("loginBox").classList.remove("hidden");
     }
 
-    async function fetchAllSensorData() {
-  const user = "your_user_email@example.com"; // or any unique user string
-
-  const pins = ['v1', 'v2', 'v3', 'v4'];
-
-  // 1. Fetch all 4 sensor values from backend
-  for (let pin of pins) {
-    await fetch(http://localhost:5000/api/latest/${pin}?user=${user});
-  }
-
-  // 2. Now get the latest full data record from the backend
-  const response = await fetch('http://localhost:5000/api/latest-data');
-  const data = await response.json();
-
-  console.log('📊 Final sensor data:', data);
-
-  // 3. Update your HTML here
-  document.getElementById('ph').textContent = data.pH;
-  document.getElementById('temperature').textContent = data.temperature;
-  document.getElementById('turbidity').textContent = data.turbidity;
-  document.getElementById('tds').textContent = data.tds;
-  document.getElementById('status').textContent = data.status;
+    async function fetchSensor(pin, chart, statusEl, safeRange) {
+      try {
+        const res = await fetch(https://iwqd.onrender.com${pin}?user=${currentUser});
+        const { value } = await res.json();
+        const val = parseFloat(value);
+        const now = new Date().toLocaleTimeString();
 
         if (chart.data.labels.length > 10) {
           chart.data.labels.shift();
           chart.data.datasets[0].data.shift();
         }
+
         chart.data.labels.push(now);
         chart.data.datasets[0].data.push(val);
         chart.update();
