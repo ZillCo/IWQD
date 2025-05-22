@@ -1,40 +1,26 @@
-require('dotenv').config(); // Load .env file
+require('dotenv').config(); // Load .env
 
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const session = require('express-session');
 const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Load from environment
-const BLYNK_TOKEN = process.env.oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc;
+// Load environment variables
+const MONGO_URL = process.env.MONGO_URL;
+const BLYNK_TOKEN = process.env.BLYNK_TOKEN;
 const BLYNK_API = 'https://blynk.cloud/external/api';
-const MONGO_URL = process.env.mongodb+srv://josephmaglaque4:<Mmaglaque22>@cluster0.vy5rnw7.mongodb.net/iotdb?retryWrites=true&w=majority&appName=Cluster0;
 
-// MongoDB connection
+// Connect to MongoDB
 mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB Error:', err));
 
-// MongoStore for session
-app.use(session({
-  secret: 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: MONGO_URL,
-    collectionName: 'sessions'
-  }),
-  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
-}));
-
-// MongoDB models
+// Models
 const SensorData = mongoose.model('SensorData', {
   user: String,
   pH: Number,
@@ -73,8 +59,6 @@ app.get('/api/latest/:pin', async (req, res) => {
 });
 
 app.get('/api/latest-data', async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-
   const latest = await SensorData.findOne().sort({ timestamp: -1 });
   if (!latest) return res.status(404).json({ message: 'No data' });
 
@@ -98,14 +82,7 @@ app.post('/auth/google', async (req, res) => {
   let user = await User.findOne({ email });
   if (!user) user = await User.create({ name, email, picture });
 
-  req.session.user = {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    picture: user.picture
-  };
-
-  res.json({ message: 'Login successful' });
+  res.json({ message: 'Login successful', user });
 });
 
 app.get('/api/history', async (req, res) => {
