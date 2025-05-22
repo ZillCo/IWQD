@@ -97,7 +97,8 @@
       <h3 text-align="center">Sign In With Google</h3>
       <div id="g_id_onload"
          data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com";
-         data-callback="handleGoogleLogin"></div>
+         data-callback="handleGoogleLogin"
+        data-auto_prompt="false></div>
       <div class="g_id_signin" data-type="standard"></div>
     </div>
   </div>
@@ -227,6 +228,21 @@
         document.getElementById("loginMessage").textContent = "Invalid credentials.";
       }
     }
+    function handleCredentialResponse(response) {
+    console.log("Encoded JWT ID token: " + response.credential);
+
+    // Send token to your backend (Node.js server)
+    fetch('/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    }).then(res => res.json())
+      .then(data => {
+        console.log(data);
+        window.location.href = '/dashboard.html'; // ← redirect after successful login
+      });
+  }
+
 
     function handleGoogleLogin(response) {
       const data = jwt_decode(response.credential);
