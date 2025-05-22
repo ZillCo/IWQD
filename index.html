@@ -4,161 +4,47 @@
   <meta charset="UTF-8" />
   <title>IoT Water Quality Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-      transition: background 0.5s, color 0.5s;
-      color: black;
-    }
-    body.dark-mode {
-      background: #121212;
-    }
-    header {
-      background-color: #0066cc;
-      color: white;
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .menu-button {
-      cursor: pointer;
-      background: white;
-      color: #0066cc;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      border: none;
-      transition: all 0.3s ease;
-    }
-    .menu-button:hover {
-      background: #0066cc;
-      color: white;
-    }
-    .menu-panel {
-      background: white;
-      border: 1px solid #ccc;
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      padding: 1rem;
-      border-radius: 8px;
-      display: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .menu-panel.active {
-      display: block;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .login-box {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .login-box .g_id_signin {
-      display: inline-block;
-    }
-   .sensor-box, .report-box {
-      background: white;
-      padding: 1rem;
-      border-radius: 12px;
-      margin: 1rem auto;
-      max-width: 700px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-      color: black;
-    }
-    .sensor-box:hover, .report-box:hover {
-      transform: translateY(-5px);
-    }
-    canvas {
-      margin-bottom: 1rem;
-      max-width: 100%;
-    }
-    .hidden {
-      display: none;
-    }
+    body { font-family: Arial; background: #f7f7f7; padding: 2rem; }
+    h1 { color: #0066cc; }
+    .sensor-box { background: white; padding: 1rem; border-radius: 12px; margin-bottom: 2rem; }
+    canvas { margin-bottom: 1rem; }
   </style>
 </head>
 <body>
-   <div id="dashboard" class="hidden">
-    <header>
-      <h1>IoT Water Quality Monitoring Dashboard</h1>
-      <div>
-        <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
-        <div id="menuPanel" class="menu-panel">
-          <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
-          <button onclick="toggleGraphType()">📊 Switch Chart Type</button><br>
-          <button onclick="logout()">🔓 Logout</button>
-        </div>
-      </div>
-    </header>
-     
-    <p>Welcome, <strong id="userDisplay"></strong></p>
-     <div class="report-box">
-      <h3>My Report</h3>
-      <ul id="summaryStats">
-        <li><strong>Average pH:</strong> <span id="avgPh">-</span></li>
-        <li><strong>Average Temp (°C):</strong> <span id="avgTemp">-</span></li>
-        <li><strong>Average Turbidity:</strong> <span id="avgTurb">-</span></li>
-        <li><strong>Average TDS:</strong> <span id="avgTds">-</span></li>
-        <li><strong>Average DO:</strong> <span id="avgDo">-</span></li>
-      </ul>
-    </div>
-     
-    <div class="sensor-box">
-      <h3>pH Level</h3>
-      <canvas id="phChart"></canvas>
-      Status: <span id="phStatus">Loading...</span>
-    </div>
+  <h1>IoT Water Quality Dashboard</h1>
 
-    <div class="sensor-box">
-      <h3>Temperature (°C)</h3>
-      <canvas id="tempChart"></canvas>
-      Status: <span id="tempStatus">Loading...</span>
-    </div>
-
-    <div class="sensor-box">
-      <h3>Turbidity (NTU)</h3>
-      <canvas id="turbChart"></canvas>
-      Status: <span id="turbStatus">Loading...</span>
-    </div>
-
-    <div class="sensor-box">
-      <h3>Total Dissolved Solids (mg/L)</h3>
-      <canvas id="tdsChart"></canvas>
-      Status: <span id="tdsStatus">Loading...</span>
-    </div>
-
-    <div class="sensor-box">
-      <h3>Dissolved Oxygen (mg/L)</h3>
-      <canvas id="doChart"></canvas>
-      Status: <span id="doStatus">Loading...</span>
-    </div>
-
-    <div class="sensor-box">
-      <h3>History</h3>
-      <button onclick="openHistoryModal()">View History</button>
-      <ul id="historyList"></ul>
-    </div>
+  <div class="sensor-box">
+    <h3>pH Level</h3>
+    <canvas id="phChart"></canvas>
+    Status: <span id="phStatus">Loading...</span>
   </div>
-  <p>Status: <span id="status-value">Loading...</span></p>
+
+  <div class="sensor-box">
+    <h3>Temperature (°C)</h3>
+    <canvas id="tempChart"></canvas>
+    Status: <span id="tempStatus">Loading...</span>
+  </div>
+
+  <div class="sensor-box">
+    <h3>Turbidity (NTU)</h3>
+    <canvas id="turbChart"></canvas>
+    Status: <span id="turbStatus">Loading...</span>
+  </div>
+
+  <div class="sensor-box">
+    <h3>Total Dissolved Solids (mg/L)</h3>
+    <canvas id="tdsChart"></canvas>
+    Status: <span id="tdsStatus">Loading...</span>
+  </div>
+
+  <div class="sensor-box">
+    <h3>Dissolved Oxygen (mg/L)</h3>
+    <canvas id="doChart"></canvas>
+    Status: <span id="doStatus">Loading...</span>
+  </div>
 
   <script>
-    let currentUser = null;  
-    let darkMode = false;
-    let chartType = 'line';
-    
     const endpoints = [
       { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
       { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
@@ -168,8 +54,7 @@
     ];
 
     const charts = {};
-    const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
-    
+
     endpoints.forEach(sensor => {
       const ctx = document.getElementById(sensor.chartId).getContext("2d");
       charts[sensor.pin] = new Chart(ctx, {
@@ -178,40 +63,10 @@
         options: { scales: { y: { min: 0, max: sensor.maxY } } }
       });
     });
-    function toggleMenu() {
-      document.getElementById("menuPanel").classList.toggle("active");
-    }
 
-    function toggleDarkMode() {
-      darkMode = !darkMode;
-      document.body.classList.toggle('dark-mode');
-      document.body.style.background = darkMode ? '#121212' : '#f7f7f7';
-      document.body.style.color = darkMode ? 'white' : 'black';
-    }
-    function toggleGraphType() {
-      chartType = chartType === 'line' ? 'bar' : 'line';
-      endpoints.forEach(sensor => {
-        const chart = charts[sensor.pin];
-        chart.config.type = chartType;
-        chart.update();
-      });
-    }
-    function initDashboard(user) {
-      currentUser = user;
-      document.getElementById("loginBox").classList.add("hidden");
-      document.getElementById("dashboard").classList.remove("hidden");
-      document.getElementById("userDisplay").textContent = user;
-      updateCharts();
-      setInterval(updateCharts, 10000);
-      fetch("https://iwqd.onrender.com/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
-      });
-    }
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       try {
-        const res = await fetch(https://iwqd.onrender.com${pin}?user=${currentUser});
+        const res = await fetch(`http://localhost:3000/api/latest/${pin}`);
         const { value } = await res.json();
         const val = parseFloat(value);
         const now = new Date().toLocaleTimeString();
@@ -224,58 +79,24 @@
         chart.data.labels.push(now);
         chart.data.datasets[0].data.push(val);
         chart.update();
-        averages[pin].push(val);
-        if (averages[pin].length > 20) averages[pin].shift();
+
         statusEl.textContent = val >= safeRange[0] && val <= safeRange[1] ? "Safe ✅" : "Unsafe ⚠️";
         statusEl.style.color = val >= safeRange[0] && val <= safeRange[1] ? "green" : "red";
-        
-        updateReport();
+
       } catch (err) {
         statusEl.textContent = "Error ❌";
         statusEl.style.color = "gray";
       }
     }
+
     function updateCharts() {
       endpoints.forEach(({ pin, chartId, statusId, safe }) => {
         fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
       });
     }
-    async function loadHistory() {
-      const res = await fetch(https://iwqd.onrender.com/api/history?user=${currentUser});
-      const history = await res.json();
-      const list = document.getElementById("historyList");
-      list.innerHTML = "";
-      history.forEach(entry => {
-        const li = document.createElement("li");
-        li.textContent = ${new Date(entry.timestamp).toLocaleString()} — ${entry.parameter || entry.pin}: ${entry.value};
-        list.appendChild(li);
-      });
-    }
-window.onload = async () => {
-  const authRes = await fetch('/api/check-auth');
-  const authData = await authRes.json();
 
-  if (authData.isAuthenticated) {
-    window.location.href = 'dashboard.html';
-  } else {
-    document.getElementById('login-container').style.display = 'block';
-  }
-
-  // Load latest sensor data
-  const dataRes = await fetch('/api/latest-data');
-  const data = await dataRes.json();
-
-  document.getElementById('ph-value').textContent = data.pH;
-  document.getElementById('temp-value').textContent = data.temperature;
-  document.getElementById('turb-value').textContent = data.turbidity;
-  document.getElementById('tds-value').textContent = data.tds;
-
-  const statusEl = document.getElementById('status-value');
-  statusEl.textContent = data.status;
-  statusEl.style.color = data.status === 'Safe' ? 'green' : 'red';
-};
-  window.onload = loadLatestData;
-
+    updateCharts();
+    setInterval(updateCharts, 10000);
   </script>
 </body>
 </html>
