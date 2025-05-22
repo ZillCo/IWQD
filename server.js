@@ -42,7 +42,7 @@ const User = mongoose.model('User', {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: 'https://zillco.github.io', credentials: true }));
 app.use(express.json());
 
 // Root health check
