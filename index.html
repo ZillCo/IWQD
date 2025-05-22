@@ -228,11 +228,6 @@
       }
     }
 
-    function handleGoogleLogin(response) {
-      const data = jwt_decode(response.credential);
-      initDashboard(data.email);
-    }
-
     function initDashboard(user) {
       currentUser = user;
       document.getElementById("loginBox").classList.add("hidden");
