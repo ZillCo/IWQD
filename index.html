@@ -255,7 +255,7 @@
 
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       try {
-        const res = await fetch(`https://iwqd.onrender.com${pin}?user=${currentUser}`);
+        const res = await fetch(`https://iwqd.onrender.com/api/latest/v1?user=${currentUser}`);
         const { value } = await res.json();
         const val = parseFloat(value);
         const now = new Date().toLocaleTimeString();
