@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>IoT Water Quality Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
     body {
@@ -92,17 +91,6 @@
   </style>
 </head>
 <body>
-  <div class="login-box" id="loginBox">
-    <div>
-      <h3 text-align="center">Sign In With Google</h3>
-      <div id="g_id_onload"
-         data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com";
-         data-callback="handleGoogleLogin"
-        data-auto_prompt="false></div>
-      <div class="g_id_signin" data-type="standard"></div>
-    </div>
-  </div>
-  
    <div id="dashboard" class="hidden">
     <header>
       <h1>IoT Water Quality Monitoring Dashboard</h1>
@@ -190,17 +178,6 @@
         options: { scales: { y: { min: 0, max: sensor.maxY } } }
       });
     });
-      function handleGoogleLogin(response) {
-        const data = jwt_decode(response.credential);
-        const user = data.email || data.name || "guest";
-    // Store the user
-    currentUser = user;
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-    document.getElementById("userDisplay").textContent = user;
-    updateCharts();
-    setInterval(updateCharts, 10000);
-  }
     function toggleMenu() {
       document.getElementById("menuPanel").classList.toggle("active");
     }
@@ -219,36 +196,6 @@
         chart.update();
       });
     }
-    function login() {
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
-      if (user === "admin" && pass === "1234") {
-        initDashboard(user);
-      } else {
-        document.getElementById("loginMessage").textContent = "Invalid credentials.";
-      }
-    }
-    function handleCredentialResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
-
-    // Send token to your backend (Node.js server)
-    fetch('/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: response.credential })
-    }).then(res => res.json())
-      .then(data => {
-        console.log(data);
-        window.location.href = '/dashboard.html'; // ← redirect after successful login
-      });
-  }
-
-
-    function handleGoogleLogin(response) {
-      const data = jwt_decode(response.credential);
-      initDashboard(data.email);
-    }
-
     function initDashboard(user) {
       currentUser = user;
       document.getElementById("loginBox").classList.add("hidden");
@@ -262,13 +209,6 @@
         body: JSON.stringify(user)
       });
     }
-
-    function logout() {
-      currentUser = null;
-      document.getElementById("dashboard").classList.add("hidden");
-      document.getElementById("loginBox").classList.remove("hidden");
-    }
-
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       try {
         const res = await fetch(https://iwqd.onrender.com${pin}?user=${currentUser});
