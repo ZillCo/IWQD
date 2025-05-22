@@ -4,101 +4,196 @@
   <meta charset="UTF-8" />
   <title>IoT Water Quality Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
-    body { font-family: Arial; background: #f7f7f7; padding: 2rem; }
-    h1 { color: #0066cc; }
-    .sensor-box { background: white; padding: 1rem; border-radius: 12px; margin-bottom: 2rem; }
-    canvas { margin-bottom: 1rem; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      transition: background 0.5s;
+      color: black;
+    }
+    body.dark-mode {
+      background: #121212;
+    }
+    header {
+      background-color: #0066cc;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .menu-button {
+      cursor: pointer;
+      background: white;
+      color: #0066cc;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      border: none;
+      transition: all 0.3s ease;
+    }
+    .menu-button:hover {
+      background: #0066cc;
+      color: white;
+    }
+    .menu-panel {
+      background: white;
+      border: 1px solid #ccc;
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .menu-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .sensor-box, .report-box {
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      margin: 1rem auto;
+      max-width: 700px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      color: black;
+    }
+    .sensor-box:hover, .report-box:hover {
+      transform: translateY(-5px);
+    }
+    canvas {
+      margin-bottom: 1rem;
+      max-width: 100%;
+    }
+    .hidden {
+      display: none;
+    }
+    .login-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .login-box .g_id_signin {
+      display: inline-block;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      visibility: hidden;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-height: 70vh;
+      overflow-y: auto;
+      width: 90%;
+      max-width: 600px;
+    }
+    .modal.show {
+      visibility: visible;
+    }
+    .modal h3 {
+      margin-top: 0;
+    }
+    .modal button {
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
-  <h1>IoT Water Quality Dashboard</h1>
-
-  <div class="sensor-box">
-    <h3>pH Level</h3>
-    <canvas id="phChart"></canvas>
-    Status: <span id="phStatus">Loading...</span>
+  <div class="login-box" id="loginBox">
+    <div>
+      <h3>Sign In with Google</h3>
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID"
+           data-callback="handleGoogleLogin"></div>
+      <div class="g_id_signin" data-type="standard"></div>
+    </div>
   </div>
 
-  <div class="sensor-box">
-    <h3>Temperature (°C)</h3>
-    <canvas id="tempChart"></canvas>
-    Status: <span id="tempStatus">Loading...</span>
+  <div id="dashboard" class="hidden">
+    <header>
+      <h1>IoT Water Dashboard</h1>
+      <div>
+        <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
+        <div id="menuPanel" class="menu-panel">
+          <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
+          <button onclick="toggleGraphType('bar')">📊 Switch to Bar Chart</button><br>
+          <button onclick="toggleGraphType('line')">📈 Return to Line Chart</button><br>
+          <button onclick="logout()">🔓 Logout</button>
+        </div>
+      </div>
+    </header>
+    <p>Welcome, <strong id="userDisplay"></strong></p>
+
+    <div class="report-box">
+      <h3>My Report</h3>
+      <ul id="summaryStats">
+        <li><strong>Average pH:</strong> <span id="avgPh">-</span></li>
+        <li><strong>Average Temp (°C):</strong> <span id="avgTemp">-</span></li>
+        <li><strong>Average Turbidity:</strong> <span id="avgTurb">-</span></li>
+        <li><strong>Average TDS:</strong> <span id="avgTds">-</span></li>
+        <li><strong>Average DO:</strong> <span id="avgDo">-</span></li>
+      </ul>
+    </div>
+
+    <div class="sensor-box">
+      <h3>View History</h3>
+      <button onclick="openHistoryModal()">View History</button>
+    </div>
   </div>
 
-  <div class="sensor-box">
-    <h3>Turbidity (NTU)</h3>
-    <canvas id="turbChart"></canvas>
-    Status: <span id="turbStatus">Loading...</span>
-  </div>
-
-  <div class="sensor-box">
-    <h3>Total Dissolved Solids (mg/L)</h3>
-    <canvas id="tdsChart"></canvas>
-    Status: <span id="tdsStatus">Loading...</span>
-  </div>
-
-  <div class="sensor-box">
-    <h3>Dissolved Oxygen (mg/L)</h3>
-    <canvas id="doChart"></canvas>
-    Status: <span id="doStatus">Loading...</span>
+  <div class="modal" id="historyModal">
+    <div class="modal-content">
+      <h3>Sensor History</h3>
+      <ul id="historyList"></ul>
+      <button onclick="closeHistoryModal()">Close</button>
+    </div>
   </div>
 
   <script>
-    const endpoints = [
-      { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
-      { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
-      { pin: "v3", chartId: "turbChart", statusId: "turbStatus", label: "Turbidity (NTU)", safe: [0, 1.5], maxY: 5 },
-      { pin: "v4", chartId: "tdsChart", statusId: "tdsStatus", label: "TDS (mg/L)", safe: [0, 500], maxY: 1000 },
-      { pin: "v5", chartId: "doChart", statusId: "doStatus", label: "DO (mg/L)", safe: [6.5, 8], maxY: 14 },
-    ];
+    let currentUser = null;
 
-    const charts = {};
-
-    endpoints.forEach(sensor => {
-      const ctx = document.getElementById(sensor.chartId).getContext("2d");
-      charts[sensor.pin] = new Chart(ctx, {
-        type: "line",
-        data: { labels: [], datasets: [{ label: sensor.label, data: [], borderColor: "blue", fill: false }] },
-        options: { scales: { y: { min: 0, max: sensor.maxY } } }
-      });
-    });
-
-    async function fetchSensor(pin, chart, statusEl, safeRange) {
-      try {
-        const res = await fetch(http://localhost:3000/api/latest/${pin});
-        const { value } = await res.json();
-        const val = parseFloat(value);
-        const now = new Date().toLocaleTimeString();
-
-        if (chart.data.labels.length > 10) {
-          chart.data.labels.shift();
-          chart.data.datasets[0].data.shift();
-        }
-
-        chart.data.labels.push(now);
-        chart.data.datasets[0].data.push(val);
-        chart.update();
-
-        statusEl.textContent = val >= safeRange[0] && val <= safeRange[1] ? "Safe ✅" : "Unsafe ⚠️";
-        statusEl.style.color = val >= safeRange[0] && val <= safeRange[1] ? "green" : "red";
-
-      } catch (err) {
-        statusEl.textContent = "Error ❌";
-        statusEl.style.color = "gray";
-      }
+    function openHistoryModal() {
+      document.getElementById("historyModal").classList.add("show");
+      loadHistory();
     }
 
-    function updateCharts() {
-      endpoints.forEach(({ pin, chartId, statusId, safe }) => {
-        fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
-      });
+    function closeHistoryModal() {
+      document.getElementById("historyModal").classList.remove("show");
     }
 
-    updateCharts();
-    setInterval(updateCharts, 10000);
+    async function loadHistory() {
+      const res = await fetch(`http://localhost:3000/api/history?user=${currentUser.email}`);
+      const history = await res.json();
+      const list = document.getElementById("historyList");
+      list.innerHTML = "";
+      history.forEach(entry => {
+        const li = document.createElement("li");
+        li.textContent = `${new Date(entry.timestamp).toLocaleString()} — ${entry.parameter || entry.pin}: ${entry.value}`;
+        list.appendChild(li);
+      });
+    }
   </script>
 </body>
 </html>
-
-
