@@ -229,6 +229,7 @@
     }
 
     function handleGoogleLogin(response) {
+      console.log("Google login triggered:", response); // <-- Add this
       const data = jwt_decode(response.credential);
       initDashboard(data.email);
     }
@@ -280,7 +281,6 @@
           chart.data.labels.shift();
           chart.data.datasets[0].data.shift();
         }
-
         chart.data.labels.push(now);
         chart.data.datasets[0].data.push(val);
         chart.update();
