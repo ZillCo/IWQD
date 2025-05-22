@@ -11,6 +11,12 @@ const MONGO_URL = process.env.MONGO_URL; // and set MONGO_URL in your environmen
 const BLYNK_TOKEN = process.env.BLYNK_TOKEN;
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
+// Check env variables
+if (!MONGO_URL || !BLYNK_TOKEN) {
+  console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');
+  process.exit(1);
+}
+
 // Connect to MongoDB
 mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
@@ -39,6 +45,9 @@ const User = mongoose.model('User', {
 app.use(cors());
 app.use(express.json());
 
+// Root health check
+app.get('/', (req, res) => res.send('🌊 IoT Water Quality API is live'));
+
 // Routes
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
@@ -46,11 +55,36 @@ app.get('/api/latest/:pin', async (req, res) => {
 
   try {
     const response = await axios.get(`${BLYNK_API}/get?token=${BLYNK_TOKEN}&${pin}`);
-    const value = response.data;
+    const value = parseFloat(response.data); // for single pin reading like v1
 
-    await SensorData.create({ user, pin, value, timestamp: new Date() });
+    let sensorFields = {};
 
-    res.json({ value, user, pin, timestamp: Date.now() });
+    // Map pin to correct sensor field
+    switch (pin) {
+      case 'v1':
+        sensorFields.pH = value;
+        break;
+      case 'v2':
+        sensorFields.temperature = value;
+        break;
+      case 'v3':
+        sensorFields.turbidity = value;
+        break;
+      case 'v4':
+        sensorFields.tds = value;
+        break;
+      default:
+        return res.status(400).json({ error: 'Unknown pin' });
+    }
+
+    await SensorData.create({
+      user,
+      pin,
+      ...sensorFields,
+      timestamp: new Date()
+    });
+
+    res.json({ user, pin, ...sensorFields, timestamp: Date.now() });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get or save sensor data', detail: err.message });
   }
