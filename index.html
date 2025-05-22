@@ -125,7 +125,7 @@
     <div>
       <h3>Sign In with Google</h3>
       <div id="g_id_onload"
-           data-client_id="YOUR_GOOGLE_CLIENT_ID"
+           data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
            data-callback="handleGoogleLogin"></div>
       <div class="g_id_signin" data-type="standard"></div>
     </div>
@@ -174,6 +174,26 @@
   <script>
     let currentUser = null;
 
+    function handleGoogleLogin(response) {
+    const data = jwt_decode(response.credential);
+    currentUser = {
+      email: data.email,
+      name: data.name,
+      picture: data.picture
+    };
+
+    // Show dashboard, hide login
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    // Set user display
+    document.getElementById("userDisplay").textContent = currentUser.name || currentUser.email;
+
+    // You can also preload data or start polling here
+    updateCharts(); // if you have it
+  }
+
+
     function openHistoryModal() {
       document.getElementById("historyModal").classList.add("show");
       loadHistory();
@@ -194,6 +214,27 @@
         list.appendChild(li);
       });
     }
+    window.onload = () => {
+  const token = localStorage.getItem("google_token");
+  if (token) {
+    const data = jwt_decode(token);
+    currentUser = {
+      email: data.email,
+      name: data.name,
+      picture: data.picture
+    };
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+    document.getElementById("userDisplay").textContent = currentUser.name;
+    updateCharts();
+  }
+};
+
+function handleGoogleLogin(response) {
+  localStorage.setItem("google_token", response.credential);
+  // the rest stays the same...
+}
+
   </script>
 </body>
 </html>
