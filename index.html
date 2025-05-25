@@ -18,6 +18,10 @@
       background: #121212;
       color: white;
     }
+      /* Force these text areas to stay black even in dark mode */
+    h1, h3, p, li, span, ul, strong {
+      color: black !important;
+    }
    /* Header stays the same in dark mode */
     header {
       background-color: #0066cc;
@@ -37,10 +41,6 @@
       border: none;
       transition: background 0.3s, color 0.3s;
     }
-    body.dark-mode .menu-button {
-      background: #333;
-      color: white;
-    }
     /* Menu panel style */
     .menu-panel {
       background: white;
@@ -52,11 +52,6 @@
       border-radius: 8px;
       display: none;
       transition: background 0.3s, color 0.3s;
-    }
-    body.dark-mode .menu-panel {
-      background: #2a2a2a;
-      border-color: #555;
-      color: white;
     }
     .menu-panel.active {
       display: block;
@@ -78,12 +73,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: background 0.3s, color 0.3s;
     }
-    body.dark-mode .sensor-box,
-    body.dark-mode .report-box {
-      background: #1e1e1e;
-      color: white;
-    }
-
     canvas {
       margin-bottom: 1rem;
       max-width: 100%;
