@@ -7,16 +7,23 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
+    :root {
+      --light-bg: #ffffff;
+      --light-text: #000000;
+      --dark-bg: #1e1e2f; /* Softer dark background */
+      --dark-text: #e0e0e0;
+      
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f7f7f7;
+      background-color: var(--light-bg);
       margin: 0;
-      transition: background 0.5s, color 0.5s;
-      color: black;
+      transition: background-color 0.3s, color 0.3s;
+      color: var(--light-text);
     }
     body.dark-mode {
-      background: #121212;
-      color: white;
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
     }
       /* Force these text areas to stay black even in dark mode */
     h3, li, span, ul {
@@ -25,6 +32,7 @@
    /* Header stays the same in dark mode */
     header {
       background-color: #0066cc;
+      transition: background-color 0.3s;
       color: white;
       padding: 1rem;
       display: flex;
@@ -32,9 +40,21 @@
       align-items: flex-start;
       position: relative;
     }
+    body.dark-mode header {
+      background-color: #2b2b40; /* A smooth deep blue-gray */
+    }
     header h1, header p {
       margin: 0.3rem 0;
       line-height: 1.4;
+    }
+    .menu-button,
+    .menu-panel button {
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark-mode .menu-button,
+    body.dark-mode .menu-panel button {
+      background-color: #333;
+      color: #f5f5f5;
     }
    /* Adjust menu button for dark mode */
     .menu-button {
@@ -102,7 +122,7 @@
   <div id="dashboard" class="hidden">
     <header>
       <h1>IoT Water Quality Monitoring Dashboard</h1>
-      <p>Welcome,<br><strong id="userDisplay"></strong></p>
+      <br><p>Welcome,<strong id="userDisplay"></strong></p>
       <div>
         <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
         <div id="menuPanel" class="menu-panel">
