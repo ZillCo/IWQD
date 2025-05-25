@@ -194,21 +194,6 @@
     .hidden {
       display: none;
     }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-    .value {
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .timestamp {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #aaa;
-    }
-
   </style>
 </head>
 
@@ -248,38 +233,23 @@
       </ul>
     </div>
 
-<div class="cards">
-  <div class="sensor-box">
-    <h3>pH Level</h3>
-    <canvas id="phChart"></canvas>
-    Status: <span id="phStatus">Loading...</span>
+  <div class="container">
+    <!-- History Box (Left) -->
+    <div class="box" id="history-box">
+      <h2>Water Quality History</h2>
+      <div class="sensor-item">[History chart here]</div>
+    </div>
+
+    <!-- Sensor Data Box (Right) -->
+    <div class="box" id="sensor-box">
+      <h2>Sensor Data</h2>
+      <div class="sensor-item">pH: <span id="phValue">-</span></div>
+      <div class="sensor-item">Temperature: <span id="tempValue">-</span> °C</div>
+      <div class="sensor-item">Turbidity: <span id="turbValue">-</span></div>
+      <div class="sensor-item">TDS: <span id="tdsValue">-</span></div>
+    </div>
   </div>
-  <div class="sensor-box">
-    <h3>Temperature (°C)</h3>
-    <canvas id="tempChart"></canvas>
-    Status: <span id="tempStatus">Loading...</span>
-  </div>
-  <div class="sensor-box">
-    <h3>Turbidity (NTU)</h3>
-    <canvas id="turbChart"></canvas>
-    Status: <span id="turbStatus">Loading...</span>
-  </div>
-  <div class="sensor-box">
-    <h3>Total Dissolved Solids (mg/L)</h3>
-    <canvas id="tdsChart"></canvas>
-    Status: <span id="tdsStatus">Loading...</span>
-  </div>
-  <div class="sensor-box">
-    <h3>Dissolved Oxygen (mg/L)</h3>
-    <canvas id="doChart"></canvas>
-    Status: <span id="doStatus">Loading...</span>
-  </div>
-  <div class="sensor-box">
-    <h3>History</h3>
-    <button onclick="loadHistory()">View History</button>
-    <ul id="historyList"></ul>
-  </div>
-</div>
+
 
   <script>
     let currentUser = null;
