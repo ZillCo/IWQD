@@ -18,6 +18,7 @@
       background: #121212;
       color: white;
     }
+   /* Header stays the same in dark mode */
     header {
       background-color: #0066cc;
       color: white;
@@ -26,6 +27,7 @@
       justify-content: space-between;
       align-items: center;
     }
+   /* Adjust menu button for dark mode */
     .menu-button {
       cursor: pointer;
       background: white;
@@ -33,7 +35,13 @@
       padding: 0.5rem 1rem;
       border-radius: 5px;
       border: none;
+      transition: background 0.3s, color 0.3s;
     }
+    body.dark-mode .menu-button {
+      background: #333;
+      color: white;
+    }
+    /* Menu panel style */
     .menu-panel {
       background: white;
       border: 1px solid #ccc;
@@ -43,6 +51,12 @@
       padding: 1rem;
       border-radius: 8px;
       display: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode .menu-panel {
+      background: #2a2a2a;
+      border-color: #555;
+      color: white;
     }
     .menu-panel.active {
       display: block;
@@ -54,6 +68,7 @@
       align-items: center;
       height: 100vh;
     }
+    /* Card-like boxes */
     .sensor-box, .report-box {
       background: white;
       padding: 1rem;
@@ -61,7 +76,14 @@
       margin: 1rem auto;
       max-width: 700px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
     }
+    body.dark-mode .sensor-box,
+    body.dark-mode .report-box {
+      background: #1e1e1e;
+      color: white;
+    }
+
     canvas {
       margin-bottom: 1rem;
       max-width: 100%;
@@ -179,6 +201,11 @@
     function toggleDarkMode() {
       darkMode = !darkMode;
       document.body.classList.toggle('dark-mode');
+      // Optional: change chart line colors for better visibility
+      Object.values(charts).forEach(chart => {
+        chart.data.datasets[0].borderColor = darkMode ? "lightblue" : "blue";
+        chart.update();
+      });
     }
 
     function toggleGraphType() {
