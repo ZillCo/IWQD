@@ -150,6 +150,27 @@ app.get('/api/history', async (req, res) => {
   res.json(history);
 });
 
+// TEST ROUTE: Insert dummy data to create DB
+app.get('/test-insert', async (req, res) => {
+  try {
+    await SensorData.create({
+      user: 'test_user',
+      pH: 7,
+      temperature: 25,
+      turbidity: 1,
+      tds: 120,
+      DO: 8,
+      pin: 'v1',
+      timestamp: new Date()
+    });
+    res.send('✅ Dummy data inserted into MongoDB!');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('❌ Failed to insert data');
+  }
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
