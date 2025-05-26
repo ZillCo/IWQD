@@ -252,6 +252,7 @@
 
     function initDashboard(user) {
       currentUser = user;
+      document.querySelector("button[onclick='loadHistory()']").disabled = !currentUser;
       document.getElementById("loginBox").classList.add("hidden");
       document.getElementById("dashboard").classList.remove("hidden");
       document.getElementById("userDisplay").textContent = user;
@@ -262,8 +263,19 @@
     function toggleMenu() {
       document.getElementById("menuPanel").classList.toggle("active");
     }
-
+    function applyChartTheme() {
+      Object.values(charts).forEach(chart => {
+        chart.options.plugins = {
+          legend: { labels: { color: darkMode ? 'white' : 'black' } }
+        };
+        chart.options.scales.x.ticks.color = darkMode ? 'white' : 'black';
+        chart.options.scales.y.ticks.color = darkMode ? 'white' : 'black';
+        chart.update();
+      });
+    }
+    
     function toggleDarkMode() {
+      applyChartTheme();
       darkMode = !darkMode;
       document.body.classList.toggle('dark-mode');
       // Optional: change chart line colors for better visibility
@@ -323,13 +335,26 @@
         statusEl.style.color = "gray";
       }
     }
-
+    function updateSummaryStats() {
+      document.getElementById("avgPh").textContent = avg(averages.v1).toFixed(2);
+      document.getElementById("avgTemp").textContent = avg(averages.v2).toFixed(2);
+      document.getElementById("avgTurb").textContent = avg(averages.v3).toFixed(2);
+      document.getElementById("avgTds").textContent = avg(averages.v4).toFixed(2);
+      document.getElementById("avgDo").textContent = avg(averages.v5).toFixed(2);
+    }
+    function avg(arr) {
+      return arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
+    }
     function updateCharts() {
       endpoints.forEach(({ pin, chartId, statusId, safe }) => {
         fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
       });
     }
-
+    setInterval(() => {
+      updateCharts();
+      updateSummaryStats();
+    }, 10000
+    
     async function loadHistory() {
       const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
       const history = await res.json();
