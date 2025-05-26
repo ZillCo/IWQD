@@ -353,7 +353,7 @@
     setInterval(() => {
       updateCharts();
       updateSummaryStats();
-    }, 10000
+    }, 10000);
     
     async function loadHistory() {
       const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
