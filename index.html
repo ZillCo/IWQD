@@ -45,6 +45,10 @@
       justify-content: space-between;
       align-items: center;
       position: relative;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
     }
     h1 {
       margin: 0;
@@ -330,6 +334,9 @@
       alert("Please complete the CAPTCHA first.");
       return;
     }
+    const data = jwt_decode(response.credential);
+    const user = data.email;
+      
     const res = await fetch("/api/auth/google", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -338,19 +345,13 @@
         captcha: captchaResponse
       })
     });
-      const data = await res.json();
-    if (data.success) {
-      window.location.href = "/dashboard";
+      const result = await res.json();
+      if (result.success) {
+        initDashboard(email);
     } else {
       alert(data.message || "Login failed");
     }
   }
-    function handleGoogleLogin(response) {
-      const data = jwt_decode(response.credential);
-      const user = data.email;
-      initDashboard(user);
-    }
-
     function initDashboard(user) {
       currentUser = user;
       document.querySelector("button[onclick='loadHistory()']").disabled = !currentUser;
@@ -378,7 +379,12 @@
     function toggleDarkMode() {
       applyChartTheme();
       darkMode = !darkMode;
-      document.body.classList.toggle('dark-mode');
+      document.body.classList.toggle("dark-mode", darkMode);
+      localStorage.setItem("darkMode", darkMode);
+      window.onload = () => {
+        darkMode = localStorage.getItem("darkMode") === "true";
+        if (darkMode) document.body.classList.add("dark-mode");
+      };
       // Optional: change chart line colors for better visibility
       Object.values(charts).forEach(chart => {
         chart.data.datasets[0].borderColor = darkMode ? "lightblue" : "blue";
@@ -437,11 +443,11 @@
       }
     }
     async function updateCharts() {
-      for (const sensor of endpoints) {
-        const chart = charts[sensor.pin];
-        const statusEl = document.getElementById(sensor.statusId);
-        await fetchSensor(sensor.pin, chart, statusEl, sensor.safe);
-      }
+      endpoints.forEach(ep => {
+        if (!charts[ep.pin]) {
+          charts[ep.pin] = createChart(ep.chartId, ep.label, ep.maxY);
+        }
+      });
       updateSummaryStats();
     }
     function updateSummaryStats() {
@@ -483,6 +489,32 @@
     function onCaptchaSuccess() {
   // Show the Google Sign-In button only after captcha is solved
   document.getElementById('googleSignInBtn').style.display = 'block';
+}
+    function createChart(ctxId, label, maxY) {
+  const ctx = document.getElementById(ctxId).getContext("2d");
+  return new Chart(ctx, {
+    type: chartType,
+    data: {
+      labels: [],
+      datasets: [{
+        label,
+        data: [],
+        borderColor: "blue",
+        backgroundColor: "rgba(0, 123, 255, 0.2)",
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          min: 0,
+          max: maxY
+        }
+      }
+    }
+  });
 }
   </script>
 </body>
