@@ -7,111 +7,39 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     :root {
       --light-bg: #ffffff;
       --light-text: #000000;
       --dark-bg: #1e1e2f; /* Softer dark background */
       --dark-text: #e0e0e0;
+      
     }
-    
     body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      min-height: 100vh;
-      padding: 1rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--light-bg);
+      margin: 0;
+      transition: background-color 0.3s, color 0.3s;
       color: var(--light-text);
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: space-between;
-    }
-    .box {
-      flex: 1 1 45%; /* takes 45% of width, grows/shrinks responsively */
-      min-width: 280px;
-      background-color: #fff;
-      padding: 1.5rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
-    }
-
-    .box:hover {
-      transform: translateY(-4px);
-    }
-
-    .box h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-      color: #2c3e50;
-    }
-
-    .sensor-item {
-      font-size: 1.1rem;
-      margin-bottom: 0.75rem;
-    }
-
-    @media (max-width: 768px) {
-      .box {
-        flex: 1 1 100%;
-      }
     }
     body.dark-mode {
       background-color: var(--dark-bg);
       color: var(--dark-text);
     }
-    /* Sidebar */
-    nav {
-      width: 220px;
-      background-color: #111122;
-      padding: 20px;
-      flex-shrink: 0;
-    }
-    
-    nav ul {
-      list-style: none;
-    }
-    nav li {
-      margin-bottom: 20px;
-    }
-    nav a {
-      color: #ccc;
-      text-decoration: none;
-      font-size: 16px;
-    }
-    nav a:hover {
-      color: #fff;
-    }
-    /* Main content */
-    main {
-      flex: 1;
-      padding: 30px;
-      background-color: #2c2c3a;
-    }
-
       /* Force these text areas to stay black even in dark mode */
     h3, li, span, ul {
       color: black !important;
     }
-    
    /* Header stays the same in dark mode */
     header {
-      background-color: #111122;
-      padding: 15px 30px;
-      border-radius: 8px;
-      margin-bottom: 30px;
+      background-color: #0066cc;
+      transition: background-color 0.3s;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
     }
-    header h2 {
-      color: #00d4ff;
-    }
-
     h1 {
       margin: 0;
     }
@@ -190,6 +118,43 @@
     .hidden {
       display: none;
     }
+        .dashboard {
+      display: flex;
+      padding: 20px;
+      gap: 20px;
+    }
+    .left-panel {
+      flex: 1;
+    }
+    .right-panel {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+    .chart {
+      height: 120px;
+      background-color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    body.dark-mode .menu-panel {
+      background-color: #2e2e40;
+      color: white;
+    }
+    body.dark-mode .card {
+      background-color: #2c2c3a;
+      color: white;
+    }
   </style>
 </head>
 
@@ -229,23 +194,39 @@
       </ul>
     </div>
 
-  <div class="container">
-    <!-- History Box (Left) -->
-    <div class="box" id="history-box">
-      <h2>Water Quality History</h2>
-      <div class="sensor-item">[History chart here]</div>
+    <div class="sensor-box">
+      <h3>pH Level</h3>
+      <canvas id="phChart"></canvas>
+      Status: <span id="phStatus">Loading...</span>
     </div>
-
-    <!-- Sensor Data Box (Right) -->
-    <div class="box" id="sensor-box">
-      <h2>Sensor Data</h2>
-      <div class="sensor-item">pH: <span id="phValue">-</span></div>
-      <div class="sensor-item">Temperature: <span id="tempValue">-</span> °C</div>
-      <div class="sensor-item">Turbidity: <span id="turbValue">-</span></div>
-      <div class="sensor-item">TDS: <span id="tdsValue">-</span></div>
+    <div class="sensor-box">
+      <h3>Temperature (°C)</h3>
+      <canvas id="tempChart"></canvas>
+      Status: <span id="tempStatus">Loading...</span>
+    </div>
+    <div class="sensor-box">
+      <h3>Turbidity (NTU)</h3>
+      <canvas id="turbChart"></canvas>
+      Status: <span id="turbStatus">Loading...</span>
+    </div>
+    <div class="sensor-box">
+      <h3>Total Dissolved Solids (mg/L)</h3>
+      <canvas id="tdsChart"></canvas>
+      Status: <span id="tdsStatus">Loading...</span>
+    </div>
+    <div class="sensor-box">
+      <h3>Dissolved Oxygen (mg/L)</h3>
+      <canvas id="doChart"></canvas>
+      Status: <span id="doStatus">Loading...</span>
+    </div>
+    <div class="sensor-box">
+      <h3>History</h3>
+      <button onclick="loadHistory()">View History</button>
+      <ul id="historyList"></ul>
     </div>
   </div>
 
+  <p>Status: <span id="status-value">Loading...</span></p>
 
   <script>
     let currentUser = null;
@@ -318,7 +299,7 @@
 
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       try {
-        const res = await fetch(`https://iwqd.onrender.com/${pin}?user=${currentUser}`);
+        const res = await fetch(https://iwqd.onrender.com/${pin}?user=${currentUser});
         const { value } = await res.json();
         const val = parseFloat(value);
         const now = new Date().toLocaleTimeString();
@@ -350,13 +331,13 @@
     }
 
     async function loadHistory() {
-      const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
+      const res = await fetch(https://iwqd.onrender.com/api/history?user=${currentUser});
       const history = await res.json();
       const list = document.getElementById("historyList");
       list.innerHTML = "";
       history.forEach(entry => {
         const li = document.createElement("li");
-        li.textContent = `${new Date(entry.timestamp).toLocaleString()} — ${entry.parameter || entry.pin}: ${entry.value}`;
+        li.textContent = ${new Date(entry.timestamp).toLocaleString()} — ${entry.parameter || entry.pin}: ${entry.value};
         list.appendChild(li);
       });
     }
