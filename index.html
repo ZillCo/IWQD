@@ -345,11 +345,11 @@
       alert(data.message || "Login failed");
     }
   }
-    /*function handleGoogleLogin(response) {
+    function handleGoogleLogin(response) {
       const data = jwt_decode(response.credential);
       const user = data.email;
       initDashboard(user);
-    }*/
+    }
 
     function initDashboard(user) {
       currentUser = user;
