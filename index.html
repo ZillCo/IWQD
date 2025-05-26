@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IoT Water Quality Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -146,7 +147,7 @@
     .hidden {
       display: none;
     }
-        .dashboard {
+    .dashboard {
       display: flex;
       padding: 20px;
       gap: 20px;
@@ -349,11 +350,11 @@
       alert(data.message || "Login failed");
     }
   }
-    function handleGoogleLogin(response) {
+    /*function handleGoogleLogin(response) {
       const data = jwt_decode(response.credential);
       const user = data.email;
       initDashboard(user);
-    }
+    }*/
 
     function initDashboard(user) {
       currentUser = user;
