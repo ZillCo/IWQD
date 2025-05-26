@@ -31,6 +31,7 @@ const SensorData = mongoose.model('SensorData', {
   temperature: Number,
   turbidity: Number,
   tds: Number,
+  DO: Number,
   pin: String,
   timestamp: Date
 });
@@ -73,18 +74,21 @@ app.get('/api/latest/:pin', async (req, res) => {
       case 'v4':
         sensorFields.tds = value;
         break;
+      case 'v5':
+        sensorFields.DO = value;
+        break;
       default:
         return res.status(400).json({ error: 'Unknown pin' });
     }
-
+    const timestamp = new Date();
     await SensorData.create({
       user,
       pin,
       ...sensorFields,
-      timestamp: new Date()
+      timestamp
     });
-
-    res.json({ user, pin, ...sensorFields, timestamp: Date.now() });
+    
+    res.json({ user, pin, ...sensorFields, timestamp });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get or save sensor data', detail: err.message });
   }
@@ -98,7 +102,8 @@ app.get('/api/latest-data', async (req, res) => {
     latest.pH >= 6.5 && latest.pH <= 8.5 &&
     latest.temperature >= 20 && latest.temperature <= 35 &&
     latest.turbidity <= 5 &&
-    latest.tds <= 500;
+    latest.tds <= 500 &&
+    latest.DO >= 6.5 && latest.DO <= 8.5;
 
   res.json({
     ...latest.toObject(),
