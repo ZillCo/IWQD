@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const client = new OAuth2Client("1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com");
 
 // Load environment variables
-const MONGO_URL = process.env.MONGO_URL; // and set MONGO_URL in your environment properly
+const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.mongodb.net/iot_dashboard?retryWrites=true&w=majority";
 const BLYNK_TOKEN = process.env.BLYNK_TOKEN;
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
