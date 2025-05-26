@@ -357,6 +357,14 @@
         statusEl.style.color = "gray";
       }
     }
+    async function updateCharts() {
+      for (const sensor of endpoints) {
+        const chart = charts[sensor.pin];
+        const statusEl = document.getElementById(sensor.statusId);
+        await fetchSensor(sensor.pin, chart, statusEl, sensor.safe);
+      }
+      updateSummaryStats();
+    }
     function updateSummaryStats() {
       document.getElementById("avgPh").textContent = avg(averages.v1).toFixed(2);
       document.getElementById("avgTemp").textContent = avg(averages.v2).toFixed(2);
@@ -378,15 +386,20 @@
     }, 10000);
     
     async function loadHistory() {
-      const res = await fetch(`https://iwqd.onrender.com/api/history?user=${currentUser}`);
-      const history = await res.json();
-      const list = document.getElementById("historyList");
-      list.innerHTML = "";
-      history.forEach(entry => {
-        const li = document.createElement("li");
-        li.textContent = `${new Date(entry.timestamp).toLocaleString()} — ${entry.parameter || entry.pin}: ${entry.value}`;
-        list.appendChild(li);
-      });
+      try {
+        const res = await fetch(`/api/history?user=${currentUser}`);
+        const data = await res.json();
+        const list = document.getElementById("historyList");
+        list.innerHTML = "";
+
+        data.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = `Time: ${item.time}, pH: ${item.v1}, Temp: ${item.v2}, Turb: ${item.v3}, TDS: ${item.v4}, DO: ${item.v5}`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        alert("Failed to load history.");
+      }
     }
   </script>
 </body>
