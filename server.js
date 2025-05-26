@@ -1,3 +1,5 @@
+require('dotenv').config(); // Load variables from .env
+
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -9,13 +11,13 @@ const mongoose = require('mongoose');
 const client = new OAuth2Client("1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com");
 
 // Load environment variables
-const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.mongodb.net/iot_dashboard?retryWrites=true&w=majority";
-const BLYNK_TOKEN = process.env.BLYNK_TOKEN;
+const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const BLYNK_TOKEN ="oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc";
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
 // Check env variables
 if (!MONGO_URL || !BLYNK_TOKEN) {
-  console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');
+  console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');s
   process.exit(1);
 }
 
@@ -149,27 +151,6 @@ app.get('/api/history', async (req, res) => {
   const history = await SensorData.find({ user }).sort({ timestamp: -1 }).limit(100);
   res.json(history);
 });
-
-// TEST ROUTE: Insert dummy data to create DB
-app.get('/test-insert', async (req, res) => {
-  try {
-    await SensorData.create({
-      user: 'test_user',
-      pH: 7,
-      temperature: 25,
-      turbidity: 1,
-      tds: 120,
-      DO: 8,
-      pin: 'v1',
-      timestamp: new Date()
-    });
-    res.send('✅ Dummy data inserted into MongoDB!');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('❌ Failed to insert data');
-  }
-});
-
 
 // Start server
 app.listen(PORT, () => {
