@@ -347,7 +347,7 @@
     });
       const result = await res.json();
       if (result.success) {
-        initDashboard(email);
+        initDashboard(user);
     } else {
       alert(data.message || "Login failed");
     }
