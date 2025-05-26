@@ -132,13 +132,6 @@
       flex-direction: column;
       gap: 10px;
     }
-
-    .card {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 10px;
-      background-color: #f9f9f9;
-    }
     .chart {
       height: 120px;
       background-color: #ddd;
@@ -151,9 +144,29 @@
       background-color: #2e2e40;
       color: white;
     }
-    body.dark-mode .card {
-      background-color: #2c2c3a;
-      color: white;
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    #history {
+      order: 1;
+      flex: 1;
+      min-width: 300px;
+    }
+    #sensors {
+      order: 2;
+      flex: 1;
+      min-width: 300px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      #history, #sensors {
+        order: unset;
+      }
     }
   </style>
 </head>
@@ -182,7 +195,7 @@
         </div>
       </div>
     </header>
-    
+
     <div class="report-box">
       <h3>My Report</h3>
       <ul id="summaryStats">
@@ -194,37 +207,51 @@
       </ul>
     </div>
 
-    <div class="sensor-box">
-      <h3>pH Level</h3>
-      <canvas id="phChart"></canvas>
-      Status: <span id="phStatus">Loading...</span>
-    </div>
-    <div class="sensor-box">
-      <h3>Temperature (°C)</h3>
-      <canvas id="tempChart"></canvas>
-      Status: <span id="tempStatus">Loading...</span>
-    </div>
-    <div class="sensor-box">
-      <h3>Turbidity (NTU)</h3>
-      <canvas id="turbChart"></canvas>
-      Status: <span id="turbStatus">Loading...</span>
-    </div>
-    <div class="sensor-box">
-      <h3>Total Dissolved Solids (mg/L)</h3>
-      <canvas id="tdsChart"></canvas>
-      Status: <span id="tdsStatus">Loading...</span>
-    </div>
-    <div class="sensor-box">
-      <h3>Dissolved Oxygen (mg/L)</h3>
-      <canvas id="doChart"></canvas>
-      Status: <span id="doStatus">Loading...</span>
-    </div>
-    <div class="sensor-box">
-      <h3>History</h3>
-      <button onclick="loadHistory()">View History</button>
-      <ul id="historyList"></ul>
+    <div class="container">
+      <!-- Move your history section here -->
+      <div id="history">
+        <div class="sensor-box">
+          <h3>History</h3>
+          <button onclick="loadHistory()">View History</button>
+          <ul id="historyList"></ul>
+        </div>
+      </div>
+      
+      <!-- Move your sensors section here -->
+      <div id="sensors">
+        <div class="sensor-box">
+          <h3>pH Level</h3>
+          <canvas id="phChart"></canvas>
+          Status: <span id="phStatus">Loading...</span>
+        </div>
+        
+        <div class="sensor-box">
+          <h3>Temperature (°C)</h3>
+          <canvas id="tempChart"></canvas>
+          Status: <span id="tempStatus">Loading...</span>
+        </div>
+        
+        <div class="sensor-box">
+          <h3>Turbidity (NTU)</h3>
+          <canvas id="turbChart"></canvas>
+          Status: <span id="turbStatus">Loading...</span>
+        </div>
+        
+        <div class="sensor-box">
+          <h3>Total Dissolved Solids (mg/L)</h3>
+          <canvas id="tdsChart"></canvas>
+          Status: <span id="tdsStatus">Loading...</span>
+        </div>
+        
+        <div class="sensor-box">
+          <h3>Dissolved Oxygen (mg/L)</h3>
+          <canvas id="doChart"></canvas>
+          Status: <span id="doStatus">Loading...</span>
+        </div>
+      </div>
     </div>
   </div>
+  
   <script>
     let currentUser = null;
     let darkMode = false;
