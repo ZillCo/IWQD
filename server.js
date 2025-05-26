@@ -116,6 +116,30 @@ app.get('/api/latest-data', async (req, res) => {
     status: isSafe ? 'Safe' : 'Unsafe'
   });
 });
+app.post('/api/data', async (req, res) => {
+  try {
+    const { pH, temperature, turbidity, tds, DO } = req.body;
+
+    if (!pH || !temperature || !turbidity || !tds || !DO) {
+      return res.status(400).json({ message: 'Missing fields' });
+    }
+
+    const newData = new SensorData({
+      pH,
+      temperature,
+      turbidity,
+      tds,
+      DO,
+      timestamp: new Date()
+    });
+
+    await newData.save();
+    res.status(201).json({ message: 'Sensor data saved successfully' });
+  } catch (error) {
+    console.error('Error saving sensor data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 app.post("/api/auth/google", async (req, res) => {
   const { idToken, captcha } = req.body;
