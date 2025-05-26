@@ -1,3 +1,6 @@
+<!-- captcha site key 6LdXQEkrAAAAAPOtTK0_X9QdLl68ckIFrYTHPArg -->
+<!-- captcha secret key 6LdXQEkrAAAAAFIuf23pgd-kskPP00y1CCe85syh -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +8,7 @@
   <title>IoT Water Quality Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
     :root {
@@ -18,9 +22,12 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--light-bg);
       margin: 0;
+      padding: 0;
+      display: flex;
       align-items: center;   /* vertical centering */
       justify-content: center; /* horizontal centering */
       transition: background-color 0.3s, color 0.3s;
+      height: 100vh;
       color: var(--light-text);
     }
     body.dark-mode {
@@ -78,11 +85,11 @@
     /* Improved styling for the login box */
     .login-box {
       background-color: white;
-      width: 350px;
+      width: 300px;
       height: 500px; /* vertical rectangle */
-      padding: 40px 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       text-align: center;
       display: flex;
       max-width: 350px;
@@ -175,6 +182,25 @@
       gap: 1rem;
       padding: 1rem;
     }
+    
+     .container1 {
+       justify-content: center;
+       align-items: center;
+       height: 100vh;
+       background-color: #1e1e1e;
+       padding: 2rem;
+       border-radius: 10px;
+       box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+       width: 100%;
+       max-width: 400px;
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+    }
+    .g-recaptcha {
+      margin: 1.5rem 0;
+    }
+
     #history {
       order: 1;
       flex: 1;
@@ -197,13 +223,21 @@
 </head>
 
 <body>
-  <div class="login-box" id="loginBox">
-    <div>
-      <h3>Sign In With Google</h3>
-      <div id="g_id_onload"
-        data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
-        data-callback="handleGoogleLogin"></div>
-      <div class="g_id_signin" data-type="standard"></div>
+    <div class="container1">
+      <div class="login-box" id="loginBox">
+        <h3>Sign In With Google</h3>
+        <!-- reCAPTCHA widget -->
+        <div class="g-recaptcha" data-sitekey="6LdXQEkrAAAAAPOtTK0_X9QdLl68ckIFrYTHPArg" data-callback="onCaptchaSuccess"></div>
+        
+        <!-- Google sign-in button, initially hidden -->
+        <div id="googleSignInBtn" style="margin-top: 30px; display:none;">
+          <div id="g_id_onload"
+            data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
+            data-callback="handleGoogleLogin"
+            data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin" data-type="standard"></div>
+        </div>
     </div>
   </div>
 
@@ -293,6 +327,30 @@
     const charts = {};
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
 
+    function onCaptchaSuccess() {
+    document.getElementById("googleSignInBtn").style.display = "block";
+  }
+    async function handleGoogleLogin(response) {
+    const captchaResponse = grecaptcha.getResponse();
+    if (!captchaResponse) {
+      alert("Please complete the CAPTCHA first.");
+      return;
+    }
+    const res = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idToken: response.credential,
+        captcha: captchaResponse
+      })
+    });
+      const data = await res.json();
+    if (data.success) {
+      window.location.href = "/dashboard";
+    } else {
+      alert(data.message || "Login failed");
+    }
+  }
     function handleGoogleLogin(response) {
       const data = jwt_decode(response.credential);
       const user = data.email;
@@ -428,6 +486,10 @@
         alert("Failed to load history.");
       }
     }
+    function onCaptchaSuccess() {
+  // Show the Google Sign-In button only after captcha is solved
+  document.getElementById('googleSignInBtn').style.display = 'block';
+}
   </script>
 </body>
 </html>
