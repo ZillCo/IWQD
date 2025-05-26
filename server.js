@@ -21,7 +21,7 @@ if (!MONGO_URL || !BLYNK_TOKEN) {
 }
 
 // Connect to MongoDB
-mongoose.connect("mongodb+srv://<josephmaglaque4>:<Mmaglaque22>@<Cluster0>.mongodb.net/<dbname>?retryWrites=true&w=majority")
+mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('✅ Connected to MongoDB'))
@@ -44,12 +44,6 @@ const SensorData = mongoose.model('SensorData', {
   DO: Number,
   pin: String,
   timestamp: Date
-});
-
-const User = mongoose.model('User', {
-  name: String,
-  email: String,
-  picture: String
 });
 
 // Middleware
