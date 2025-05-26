@@ -232,8 +232,7 @@
           <div id="g_id_onload"
             data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
             data-callback="handleGoogleLogin"
-            data-auto_prompt="false">
-          </div>
+            data-auto_prompt="false"></div>
           <div class="g_id_signin" data-type="standard"></div>
         </div>
     </div>
@@ -335,7 +334,7 @@
       return;
     }
     const data = jwt_decode(response.credential);
-    const user = data.email;
+    const user = data.user;
       
     const res = await fetch("/api/auth/google", {
       method: "POST",
