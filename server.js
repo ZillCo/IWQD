@@ -1,10 +1,13 @@
 const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 5000;
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 const mongoose = require('mongoose');
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const client = new OAuth2Client("1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com");
 
 // Load environment variables
 const MONGO_URL = process.env.MONGO_URL; // and set MONGO_URL in your environment properly
@@ -18,11 +21,18 @@ if (!MONGO_URL || !BLYNK_TOKEN) {
 }
 
 // Connect to MongoDB
-mongoose.connect(MONGO_URL, {
+mongoose.connect("mongodb+srv://<josephmaglaque4>:<Mmaglaque22>@<Cluster0>.mongodb.net/<dbname>?retryWrites=true&w=majority")
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB Error:', err));
+
+// Define user schema/model
+const User = mongoose.model('User', new mongoose.Schema({
+  email: String,
+  name: String,
+  picture: String
+}));
 
 // Models
 const SensorData = mongoose.model('SensorData', {
@@ -45,6 +55,7 @@ const User = mongoose.model('User', {
 // Middleware
 app.use(cors({ origin: 'https://zillco.github.io', credentials: true }));
 app.use(express.json());
+app.use(express.static("public")); // HTML is inside /public
 
 // Root health check
 app.get('/', (req, res) => res.send('🌊 IoT Water Quality API is live'));
@@ -111,15 +122,33 @@ app.get('/api/latest-data', async (req, res) => {
   });
 });
 
-app.post('/auth/google', async (req, res) => {
-  const { name, email, picture } = req.body;
+app.post("/api/auth/google", async (req, res) => {
+  const { idToken, captcha } = req.body;
+  if (!idToken || !captcha) {
+    return res.status(400).json({ success: false, message: "Missing token or CAPTCHA" });
+  }
+// Verify Google token
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: "1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com",
+    });
 
-  if (!email) return res.status(400).json({ message: 'Missing email' });
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
 
-  let user = await User.findOne({ email });
-  if (!user) user = await User.create({ name, email, picture });
-
-  res.json({ message: 'Login successful', user });
+    // 👇 Save or update user in DB
+        await User.findOneAndUpdate(
+      { email },
+      { name, picture },
+      { upsert: true, new: true }
+    );
+    
+    return res.json({ success: true, email });
+  } catch (err) {
+    console.error("Login error:", err);
+    return res.status(401).json({ success: false, message: "Invalid token" });
+  }
 });
 
 app.get('/api/history', async (req, res) => {
