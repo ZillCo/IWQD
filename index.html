@@ -312,9 +312,7 @@
     let currentUser = null;
     let darkMode = false;
     let chartType = 'line';
-    
-    fetch(`https://iwqd.onrender.com/v1?user=${user.email}`) // not just user or null
-    
+      
     const endpoints = [
       { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
       { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
@@ -342,7 +340,7 @@
       return;
     }
       try {
-        const res = await fetch("/api/auth/google", {
+        const res = await fetch("/auth/google", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
