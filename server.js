@@ -149,7 +149,7 @@ app.post("/api/auth/google", async (req, res) => {
 // Verify Google token
   try {
     const ticket = await client.verifyIdToken({
-      idToken,
+      idToken: token,
       audience: "1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com",
     });
 
