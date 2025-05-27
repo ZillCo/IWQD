@@ -2,13 +2,14 @@ require('dotenv').config(); // Load variables from .env
 
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 5000;
 const cors = require('cors');
-const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
 const mongoose = require('mongoose');
 
-const client = new OAuth2Client("1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com");
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com);
+
+const PORT = process.env.PORT || 5000;
 
 // Load environment variables
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -141,32 +142,24 @@ app.post('/api/data', async (req, res) => {
   }
 });
 
-app.post("/api/auth/google", async (req, res) => {
-  const { idToken, captcha } = req.body;
-  if (!idToken || !captcha) {
+app.post("/auth/google", async (req, res) => {
+  const { token, captcha } = req.body;
+  if (!token || !captcha) {
     return res.status(400).json({ success: false, message: "Missing token or CAPTCHA" });
   }
 // Verify Google token
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: "1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com",
+      audience: process.env.1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com,
     });
 
     const payload = ticket.getPayload();
-    const { email, name, picture } = payload;
+    res.json({ user: payload });
 
-    // 👇 Save or update user in DB
-        await User.findOneAndUpdate(
-      { email },
-      { name, picture },
-      { upsert: true, new: true }
-    );
-    
-    return res.json({ success: true, email });
-  } catch (err) {
-    console.error("Login error:", err);
-    return res.status(401).json({ success: false, message: "Invalid token" });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(401).json({ error: "Invalid Google token"  });
   }
 });
 
