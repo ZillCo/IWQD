@@ -343,10 +343,13 @@
       try {
         const res = await fetch("https://iwqd.onrender.com/auth/google", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json"
+          },
           body: JSON.stringify({
-            idToken: response.credential,
-            captcha: captchaResponse
+            idToken: googleUser.getAuthResponse().id_token, // from Google Sign-In
+            captcha: grecaptcha.getResponse()              // from reCAPTCHA
+
           })
         });
         const result = await res.json();
