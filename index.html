@@ -507,7 +507,8 @@
     function onCaptchaSuccess() {
   // Show the Google Sign-In button only after captcha is solved
   document.getElementById('googleSignInBtn').style.display = 'block';
-}
+    }
+    
     function createChart(ctxId, label, maxY) {
   const ctx = document.getElementById(ctxId).getContext("2d");
   return new Chart(ctx, {
