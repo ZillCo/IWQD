@@ -144,6 +144,9 @@ app.post('/api/data', async (req, res) => {
 
 app.post("/auth/google", async (req, res) => {
   const { token, captcha } = req.body;
+  console.log("Received token:", token);
+  console.log("Received captcha:", captcha);
+
   if (!token || !captcha) {
     return res.status(400).json({ success: false, message: "Missing token or CAPTCHA" });
   }
