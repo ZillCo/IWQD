@@ -333,30 +333,35 @@
       alert("Please complete the CAPTCHA first.");
       return;
     }
-    const data = jwt_decode(response.credential);
-    const user = data.user;
-      
-    const res = await fetch("/api/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        idToken: response.credential,
-        captcha: captchaResponse
-      })
-    });
-      const result = await res.json();
-      if (result.success) {
-        initDashboard(user);
-    } else {
-      alert(data.message || "Login failed");
+      try {
+        const res = await fetch("/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            idToken: response.credential,
+            captcha: captchaResponse
+          })
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+          initDashboard(user);
+        
+        } else {
+          alert(result.message || "Login failed");
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        alert("Error connecting to server.");
+      }
     }
-  }
+    
     function initDashboard(user) {
       currentUser = user;
       document.querySelector("button[onclick='loadHistory()']").disabled = !currentUser;
       document.getElementById("loginBox").classList.add("hidden");
       document.getElementById("dashboard").classList.remove("hidden");
-      document.getElementById("userDisplay").textContent = user;
+      document.getElementById("userDisplay").textContent = user.name;
       updateCharts();
       setInterval(updateCharts, 10000);
     }
