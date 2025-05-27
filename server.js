@@ -7,7 +7,7 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 
 const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const PORT = process.env.PORT || 5000;
 
@@ -18,7 +18,7 @@ const BLYNK_API = 'https://blynk.cloud/external/api';
 
 // Check env variables
 if (!MONGO_URL || !BLYNK_TOKEN) {
-  console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');s
+  console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');
   process.exit(1);
 }
 
@@ -151,7 +151,7 @@ app.post("/auth/google", async (req, res) => {
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
