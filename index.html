@@ -312,7 +312,9 @@
     let currentUser = null;
     let darkMode = false;
     let chartType = 'line';
-
+    
+    fetch(`https://iwqd.onrender.com/v1?user=${user.email}`) // not just user or null
+    
     const endpoints = [
       { pin: "v1", chartId: "phChart", statusId: "phStatus", label: "pH", safe: [6.5, 8.5], maxY: 14 },
       { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
@@ -323,6 +325,12 @@
 
     const charts = {};
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
+    
+    if (user) {
+      fetchSensorData(user.email);
+    } else {
+      console.warn('No user logged in.');
+    }
 
     function onCaptchaSuccess() {
     document.getElementById("googleSignInBtn").style.display = "block";
