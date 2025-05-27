@@ -347,11 +347,11 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            idToken: googleUser.getAuthResponse().id_token, // from Google Sign-In
-            captcha: grecaptcha.getResponse()              // from reCAPTCHA
-
+            idToken: response.credential, // from Google Sign-In
+            captcha: grecaptcha.getResponse()     // from reCAPTCHA
           })
         });
+        
         const result = await res.json();
         
         if (result.success) {
@@ -367,13 +367,41 @@
     }
     
     function initDashboard(user) {
-      currentUser = user;
-      document.querySelector("button[onclick='loadHistory()']").disabled = !currentUser;
+      user = currentUser;
+      document.querySelector("button[onclick='loadHistory()']").disabled = !user;
       document.getElementById("loginBox").classList.add("hidden");
       document.getElementById("dashboard").classList.remove("hidden");
-      document.getElementById("userDisplay").textContent = user.name;
+      document.getElementById("userDisplay").textContent = user.email;
+      fetchSensorData(user.email);
       updateCharts();
       setInterval(updateCharts, 10000);
+    }
+    
+    async function fetchSensor(pin, chart, statusEl, safeRange) {
+      try {
+        const res = await fetch(`https://iwqd.onrender.com/${pin}?user=${currentUser}`);
+        const { value } = await res.json();
+        const val = parseFloat(value);
+        const now = new Date().toLocaleTimeString();
+
+        if (chart.data.labels.length > 10) {
+          chart.data.labels.shift();
+          chart.data.datasets[0].data.shift();
+        }
+
+        chart.data.labels.push(now);
+        chart.data.datasets[0].data.push(val);
+        chart.update();
+
+        averages[pin].push(val);
+        if (averages[pin].length > 20) averages[pin].shift();
+
+        statusEl.textContent = val >= safeRange[0] && val <= safeRange[1] ? "Safe ✅" : "Unsafe ⚠️";
+        statusEl.style.color = val >= safeRange[0] && val <= safeRange[1] ? "green" : "red";
+      } catch (err) {
+        statusEl.textContent = "Error ❌";
+        statusEl.style.color = "gray";
+      }
     }
 
     function toggleMenu() {
@@ -416,7 +444,8 @@
     }
 
     function logout() {
-      currentUser = null;
+      user = null;
+      location.reload();
       document.getElementById("dashboard").classList.add("hidden");
       document.getElementById("loginBox").classList.remove("hidden");
     }
@@ -430,32 +459,7 @@
       });
     });
 
-    async function fetchSensor(pin, chart, statusEl, safeRange) {
-      try {
-        const res = await fetch(`https://iwqd.onrender.com/${pin}?user=${currentUser}`);
-        const { value } = await res.json();
-        const val = parseFloat(value);
-        const now = new Date().toLocaleTimeString();
-
-        if (chart.data.labels.length > 10) {
-          chart.data.labels.shift();
-          chart.data.datasets[0].data.shift();
-        }
-
-        chart.data.labels.push(now);
-        chart.data.datasets[0].data.push(val);
-        chart.update();
-
-        averages[pin].push(val);
-        if (averages[pin].length > 20) averages[pin].shift();
-
-        statusEl.textContent = val >= safeRange[0] && val <= safeRange[1] ? "Safe ✅" : "Unsafe ⚠️";
-        statusEl.style.color = val >= safeRange[0] && val <= safeRange[1] ? "green" : "red";
-      } catch (err) {
-        statusEl.textContent = "Error ❌";
-        statusEl.style.color = "gray";
-      }
-    }
+    
     async function updateCharts() {
       endpoints.forEach(ep => {
         if (!charts[ep.pin]) {
@@ -486,7 +490,7 @@
     
     async function loadHistory() {
       try {
-        const res = await fetch(`/api/history?user=${currentUser}`);
+        const res = await fetch(`/api/history?user=${user}`);
         const data = await res.json();
         const list = document.getElementById("historyList");
         list.innerHTML = "";
