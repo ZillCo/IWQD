@@ -16,9 +16,9 @@ const BLYNK_TOKEN ="oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc";
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
 // Middleware
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'index.html')));
 app.use(express.json());
-app.use(express.static("public"));// HTML is inside /public
+app.use(express.static("index.html"));// HTML is inside /public
 
 app.use(
   helmet({
@@ -53,7 +53,7 @@ const SensorData = mongoose.model('SensorData', {
  
 // Root health check
 app.get('/', (req, res) =>{
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 // Get latest from Blynk and save to DB
 app.get('/api/latest/:pin', async (req, res) => {
