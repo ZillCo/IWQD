@@ -1,10 +1,15 @@
 require('dotenv').config(); // Load variables from .env
 
+const session = require('express-session');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
 const express = require('express');
 const app = express();
 const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -16,6 +21,45 @@ const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mo
 const BLYNK_TOKEN ="oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc";
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
+app.use(express.static(__dirname));
+
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  })
+);
+
+app.use(session({ secret: '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', resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new GoogleStrategy({
+  clientID: '1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com',
+  clientSecret: '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',
+  callbackURL: '/auth/google/callback'
+},
+function(accessToken, refreshToken, profile, done) {
+  // Save or update user information in your database here
+  return done(null, profile);
+}));
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
 // Check env variables
 if (!MONGO_URL || !BLYNK_TOKEN) {
   console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');
