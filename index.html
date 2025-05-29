@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <title>IoT Water Quality Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <style>
     :root {
       --light-bg: #ffffff;
@@ -83,38 +80,6 @@
       padding: 0.5rem 1rem;
       transition: background 0.3s, color 0.3s;
     }
-    /* Improved styling for the login box */
-    .login-box {
-      background-color: white;
-      width: 300px;
-      height: 500px; /* vertical rectangle */
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-      display: flex;
-      max-width: 350px;
-      width: 90%;
-      margin: auto;
-      flex-direction: column;
-      justify-content: center;
-      font-weight: 600;
-      color: #333;
-      gap: 30px;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark-mode .login-box {
-      background-color: #2a2a3d;
-      color: #e0e0e0;
-      box-shadow: 0 10px 25px rgba(255,255,255,0.1);
-    }
-    .login-box h3 {
-      font-size: 1.8rem;
-      margin: 0;
-      font-weight: 700;
-      color: inherit;
-    }
-
     /* Menu panel style */
     .menu-panel {
       background: white;
@@ -183,22 +148,6 @@
       gap: 1rem;
       padding: 1rem;
     }
-    
-     .container1 {
-       justify-content: center;
-       align-items: center;
-       background-color: #1e1e1e;
-       border-radius: 10px;
-       box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-       width: 100%;
-       max-width: 400px;
-       display: flex;
-       align-items: center;
-    }
-    .g-recaptcha {
-      margin: 1.5rem 0;
-    }
-
     #history {
       order: 1;
       flex: 1;
@@ -221,27 +170,9 @@
 </head>
 
 <body>
-    <div class="container1">
-      <div class="login-box" id="loginBox">
-        <h3>Sign In With Google</h3>
-        <!-- reCAPTCHA widget -->
-        <div class="g-recaptcha" data-sitekey="6LdXQEkrAAAAAPOtTK0_X9QdLl68ckIFrYTHPArg" data-callback="onCaptchaSuccess"></div>
-        
-        <!-- Google sign-in button, initially hidden -->
-        <div id="googleSignInBtn" style="margin-top: 30px; display:none;">
-          <div id="g_id_onload"
-            data-client_id="1082316602730-lasg1o8e0ub19u2dduv98i1il8qkl5u5.apps.googleusercontent.com"
-            data-callback="handleGoogleLogin"
-            data-auto_prompt="false"></div>
-          <div class="g_id_signin" data-type="standard"></div>
-        </div>
-    </div>
-  </div>
-
-  <div id="dashboard" class="hidden">
+  <div id="dashboard">
     <header>
       <h1>IoT Water Quality Monitoring Dashboard</h1>
-      <br><p>Welcome,<strong id="userDisplay"></strong></p>
       <div>
         <button class="menu-button" onclick="toggleMenu()">☰ Menu</button>
         <div id="menuPanel" class="menu-panel">
@@ -309,8 +240,6 @@
   </div>
   
   <script>
-    let currentUser = null;
-    let user = null;
     let darkMode = false;
     let chartType = 'line';
       
@@ -324,48 +253,7 @@
 
     const charts = {};
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
-    
-    if (user) {
-      fetchSensorData(user.email);
-    } else {
-      console.warn('No user logged in.');
-    }
 
-    function onCaptchaSuccess() {
-    document.getElementById("googleSignInBtn").style.display = "block";
-  }
-    async function handleGoogleLogin(response) {
-    const captchaResponse = grecaptcha.getResponse();
-    if (!captchaResponse) {
-      alert("Please complete the CAPTCHA first.");
-      return;
-    }
-      try {
-        const res = await fetch("https://iwqd.onrender.com/auth/google", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            idToken: response.credential, // from Google Sign-In
-            captcha: grecaptcha.getResponse()     // from reCAPTCHA
-          })
-        });
-        
-        const result = await res.json();
-        
-        if (result.success) {
-          initDashboard(user);
-        
-        } else {
-          alert(result.message || "Login failed");
-        }
-      } catch (err) {
-        console.error("Login error:", err);
-        alert("Error connecting to server.");
-      }
-    }
-    
     function initDashboard(user) {
       user = currentUser;
       document.querySelector("button[onclick='loadHistory()']").disabled = !user;
