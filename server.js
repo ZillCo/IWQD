@@ -52,10 +52,10 @@ const SensorData = mongoose.model('SensorData', {
 });
  
 // Root health check
-app.get('/', (req, res) =>
+app.get('/', (req, res) =>{
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
   res.send('🌊 IoT Water Quality API is live'));
-
+});
 // Get latest from Blynk and save to DB
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
