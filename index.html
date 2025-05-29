@@ -16,6 +16,8 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--light-bg);
       color: var(--light-text);
+      margin: 0; /* Removes default margin */
+      padding: 0; /* Ensures clean layout */
     /*  height: 100vh;
       display: flex;
       align-items: center;    vertical centering 
@@ -48,9 +50,10 @@
       background-color: #2b2b40; /* A smooth deep blue-gray */
     }
     header h1, header p {
-      margin: 0.3rem 0;
+      margin: 0; /* Remove unwanted spacing */
       line-height: 1.4;
-    }    
+    }
+
    /* Adjust menu button for dark mode */
     .menu-button {
       font-size: 20px;
@@ -177,6 +180,11 @@
         flex-direction: column;
       }
     }
+    .dashboard {
+      display: flex;
+      padding: 100px 20px 20px; /* Add top padding to avoid header overlap */
+      gap: 20px;
+    }
   </style>
 </head>
 
@@ -216,34 +224,36 @@
       
       <!-- Move your sensors section here -->
       <div id="sensors">
-        <div class="sensor-box">
-          <h3>pH Level</h3>
-          <canvas id="phChart"></canvas>
-          Status: <span id="phStatus">Loading...</span>
-        </div>
-        
-        <div class="sensor-box">
-          <h3>Temperature (°C)</h3>
-          <canvas id="tempChart"></canvas>
-          Status: <span id="tempStatus">Loading...</span>
-        </div>
-        
-        <div class="sensor-box">
-          <h3>Turbidity (NTU)</h3>
-          <canvas id="turbChart"></canvas>
-          Status: <span id="turbStatus">Loading...</span>
-        </div>
-        
-        <div class="sensor-box">
-          <h3>Total Dissolved Solids (mg/L)</h3>
-          <canvas id="tdsChart"></canvas>
-          Status: <span id="tdsStatus">Loading...</span>
-        </div>
-        
-        <div class="sensor-box do-single">
-          <h3>Dissolved Oxygen (mg/L)</h3>
-          <canvas id="doChart"></canvas>
-          Status: <span id="doStatus">Loading...</span>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div class="sensor-box" style="flex: 1; min-width: 300px;">
+            <h3>pH Level</h3>
+            <canvas id="phChart"></canvas>
+            Status: <span id="phStatus">Loading...</span>
+          </div>
+          
+          <div class="sensor-box" style="flex: 1; min-width: 300px;">
+            <h3>Temperature (°C)</h3>
+            <canvas id="tempChart"></canvas>
+            Status: <span id="tempStatus">Loading...</span>
+          </div>
+          
+          <div class="sensor-box" style="flex: 1; min-width: 300px;">
+            <h3>Turbidity (NTU)</h3>
+            <canvas id="turbChart"></canvas>
+            Status: <span id="turbStatus">Loading...</span>
+          </div>
+          
+          <div class="sensor-box" style="flex: 1; min-width: 300px;">
+            <h3>Total Dissolved Solids (mg/L)</h3>
+            <canvas id="tdsChart"></canvas>
+            Status: <span id="tdsStatus">Loading...</span>
+          </div>
+          
+          <div class="sensor-box" style="width: 100%;">
+            <h3>Dissolved Oxygen (mg/L)</h3>
+            <canvas id="doChart"></canvas>
+            Status: <span id="doStatus">Loading...</span>
+          </div>
         </div>
       </div>
     </div>
