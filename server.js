@@ -14,7 +14,7 @@ const helmet = require('helmet');
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // Load environment variables
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
