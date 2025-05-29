@@ -16,10 +16,10 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--light-bg);
       color: var(--light-text);
-      height: 100vh;
+    /*  height: 100vh;
       display: flex;
-      align-items: center;   /* vertical centering */
-      justify-content: center; /* horizontal centering */
+      align-items: center;    vertical centering 
+      justify-content: center; horizontal centering */
       transition: background-color 0.3s, color 0.3s;
       
     }
@@ -94,7 +94,7 @@
     }
     
     /* Card-like boxes */
-    .sensor-box, .report-box {
+    .report-box {
       background: white;
       color: black !important;
       padding: 1rem;
@@ -146,6 +146,30 @@
     #history, #sensor {
       flex: 1;
       min-width: 300px;
+    }
+    #sensors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      max-width: 700px; /* match sensor box max width */
+      margin: 1rem auto;
+    }
+    .sensor-box {
+      background: white;
+      color: black !important;
+      padding: 1rem;
+      border-radius: 12px;
+      margin: 1rem auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: background 0.3s, color 0.3s;
+      flex: 1 1 calc(50% - 1rem); /* 2 per row with gap */
+      max-width: calc(50% - 1rem);
+      box-sizing: border-box;
+    }
+    /* For the DO sensor to take full width */
+    .sensor-box.do-single {
+      flex: 1 1 100%;
+      max-width: 100%;
     }
     
     @media (max-width: 768px) {
