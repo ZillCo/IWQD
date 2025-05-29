@@ -6,6 +6,7 @@ const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const path = require('path');
 
 const PORT = process.env.PORT;
 
@@ -15,7 +16,7 @@ const BLYNK_TOKEN ="oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc";
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
 // Middleware
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.static("public"));// HTML is inside /public
 
@@ -51,7 +52,9 @@ const SensorData = mongoose.model('SensorData', {
 });
  
 // Root health check
-app.get('/', (req, res) => res.send('🌊 IoT Water Quality API is live'));
+app.get('/', (req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.send('🌊 IoT Water Quality API is live'));
 
 // Get latest from Blynk and save to DB
 app.get('/api/latest/:pin', async (req, res) => {
