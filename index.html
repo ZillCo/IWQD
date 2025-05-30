@@ -275,20 +275,20 @@
       console.log("Window loaded");
       darkMode = localStorage.getItem("darkMode") === "true";
       if (darkMode) document.body.classList.add("dark-mode");
+      initDashboard();
       createCharts();
       updateCharts();
       updateSummaryStats();
+      
       setInterval(() => {
         updateCharts();
         updateSummaryStats();
       }, 10000);
     };
-
-    function initDashboard(user) {
-      currentUser = user;
-      document.querySelector("button[onclick='loadHistory()']").disabled = !user;
+  
+    function initDashboard() {
       document.getElementById("dashboard").classList.remove("hidden");
-      fetchSensorData(user);
+      fetchSensorData();
       createCharts();
       updateCharts();
       
