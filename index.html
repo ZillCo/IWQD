@@ -282,6 +282,7 @@
       document.querySelector("button[onclick='loadHistory()']").disabled = !user;
       document.getElementById("dashboard").classList.remove("hidden");
       fetchSensorData(user.email);
+      createCharts();
       updateCharts();
       setInterval(() => {
         updateCharts();
@@ -292,6 +293,7 @@
     function toggleMenu() {
     document.getElementById("menuPanel").classList.toggle("active");
   }
+    
     function toggleDarkMode() {
       darkMode = !darkMode;
       document.body.classList.toggle("dark-mode", darkMode);
@@ -303,6 +305,39 @@
       });
     }
     
+    function createCharts() {
+      endpoints.forEach(({ pin, chartId, label, maxY }) => {
+        const ctx = document.getElementById(chartId).getContext("2d");
+        charts[pin] = new Chart(ctx, {
+          type: chartType,
+          data: {
+            labels: [],
+            datasets: [{
+              label,
+              data: [],
+              borderColor: "blue",
+              backgroundColor: "rgba(0, 0, 255, 0.1)",
+              fill: true,
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                min: 0,
+                max: maxY,
+                ticks: { color: 'black' }
+              },
+              x: { ticks: { color: 'black' } }
+            },
+            plugins: {
+              legend: { labels: { color: 'black' } }
+            }
+          }
+        });
+      });
+      applyChartTheme();
+    }
     function toggleGraphType() {
       chartType = chartType === 'line' ? 'bar' : 'line';
       Object.values(charts).forEach(chart => {
@@ -327,10 +362,8 @@
         const res = await fetch(`https://iwqd.onrender.com/${pin}?user=${currentUser.email}`);
         const data = await res.json();
         console.log(`Response for ${pin}:`, data);
-        
-        const { value } = await res.json();
-        const val = parseFloat(value);
-        const now = new Date().toLocaleTimeString();
+        const val = parseFloat(data.value);
+        const time = new Date(data.created_at);
         
         if (chart.data.labels.length > 10) {
           chart.data.labels.shift();
@@ -385,29 +418,7 @@
     function onCaptchaSuccess() {
       document.getElementById('googleSignInBtn').style.display = 'block';
     }
-    function createChart(ctxId, label, maxY) {
-      const ctx = document.getElementById(ctxId)?.getContext("2d");
-      return new Chart(ctx, {
-        type: chartType,
-        data: {
-          labels: [],
-          datasets: [{
-            label,
-            data: [],
-            borderColor: "blue",
-            backgroundColor: "rgba(0, 123, 255, 0.2)",
-            fill: true,
-            tension: 0.4 }]
-        }, options: {
-          responsive: true,
-          scales: {
-            y: {
-              min: 0, max: maxY
-            }
-          }
-        }
-      });
-    }
+    
     // Initialize all charts at load
     endpoints.forEach(sensor => {
       charts[sensor.pin] = createChart(sensor.chartId, sensor.label, sensor.maxY);
