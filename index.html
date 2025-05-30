@@ -321,8 +321,13 @@
       });
     }
     async function fetchSensor(pin, chart, statusEl, safeRange) {
+      console.log(`Fetching from pin: ${pin}, user: ${currentUser.email}`);
+      
       try {
         const res = await fetch(`https://iwqd.onrender.com/${pin}?user=${currentUser.email}`);
+        const data = await res.json();
+        console.log(`Response for ${pin}:`, data);
+        
         const { value } = await res.json();
         const val = parseFloat(value);
         const now = new Date().toLocaleTimeString();
