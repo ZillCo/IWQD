@@ -401,7 +401,7 @@
     }
     async function loadHistory() {
       try {
-        const res = await fetch(`/api/history?user=${currentUser}`);
+        const res = await fetch('/api/history');
         const data = await res.json();
         const list = document.getElementById("historyList");
         list.innerHTML = "";
@@ -421,7 +421,7 @@
     
     // Initialize all charts at load
     endpoints.forEach(sensor => {
-      charts[sensor.pin] = createChart(sensor.chartId, sensor.label, sensor.maxY);
+      charts[sensor.pin] = createCharts(sensor.chartId, sensor.label, sensor.maxY);
     });
   </script>
 </body>
