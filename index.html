@@ -275,6 +275,13 @@
       console.log("Window loaded");
       darkMode = localStorage.getItem("darkMode") === "true";
       if (darkMode) document.body.classList.add("dark-mode");
+      createCharts();
+      updateCharts();
+      updateSummaryStats();
+      setInterval(() => {
+        updateCharts();
+        updateSummaryStats();
+      }, 10000);
     };
 
     function initDashboard(user) {
@@ -284,6 +291,7 @@
       fetchSensorData(user);
       createCharts();
       updateCharts();
+      
       setInterval(() => {
         updateCharts();
         updateSummaryStats();
@@ -342,6 +350,11 @@
       });
       applyChartTheme();
     }
+    // Initialize all charts at load
+    endpoints.forEach(sensor => {
+      charts[sensor.pin] = createCharts(sensor.chartId, sensor.label, sensor.maxY);
+    });
+    
     function toggleGraphType() {
       chartType = chartType === 'line' ? 'bar' : 'line';
       Object.values(charts).forEach(chart => {
@@ -405,7 +418,7 @@
     }
     async function loadHistory() {
       try {
-        const res = await fetch('/api/history');
+        const res = await fetch('https://iwqd.onrender.com/api/history');
         const data = await res.json();
         const list = document.getElementById("historyList");
         list.innerHTML = "";
@@ -419,10 +432,6 @@
         alert("Failed to load history.");
       }
     }
-    // Initialize all charts at load
-    endpoints.forEach(sensor => {
-      charts[sensor.pin] = createCharts(sensor.chartId, sensor.label, sensor.maxY);
-    });
   </script>
 </body>
 </html>
