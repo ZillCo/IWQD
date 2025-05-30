@@ -15,8 +15,6 @@ const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mo
 const BLYNK_TOKEN ="oVXe6YV3PrFqXQmtDg3H3eSPo2kgzJmc";
 const BLYNK_API = 'https://blynk.cloud/external/api';
 
-console.log("Website loaded");
-
 // Middleware
 app.use(express.static(path.join(__dirname, 'index.html')));
 app.use(express.json());
