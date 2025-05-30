@@ -307,6 +307,10 @@
     
     function createCharts() {
       endpoints.forEach(({ pin, chartId, label, maxY }) => {
+        if (charts[pin]) {
+          charts[pin].destroy();
+        }
+        
         const ctx = document.getElementById(chartId).getContext("2d");
         charts[pin] = new Chart(ctx, {
           type: chartType,
@@ -415,10 +419,6 @@
         alert("Failed to load history.");
       }
     }
-    function onCaptchaSuccess() {
-      document.getElementById('googleSignInBtn').style.display = 'block';
-    }
-    
     // Initialize all charts at load
     endpoints.forEach(sensor => {
       charts[sensor.pin] = createCharts(sensor.chartId, sensor.label, sensor.maxY);
