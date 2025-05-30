@@ -268,10 +268,11 @@
     const charts = {};
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
 
-    console.log("Website loaded");
+    
 
     // Load dark mode state on page load
     window.onload = () => {
+      console.log("Window loaded");
       darkMode = localStorage.getItem("darkMode") === "true";
       if (darkMode) document.body.classList.add("dark-mode");
     };
