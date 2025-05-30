@@ -281,7 +281,7 @@
       currentUser = user;
       document.querySelector("button[onclick='loadHistory()']").disabled = !user;
       document.getElementById("dashboard").classList.remove("hidden");
-      fetchSensorData(user.email);
+      fetchSensorData(user);
       createCharts();
       updateCharts();
       setInterval(() => {
@@ -360,10 +360,10 @@
       });
     }
     async function fetchSensor(pin, chart, statusEl, safeRange) {
-      console.log(`Fetching from pin: ${pin}, user: ${currentUser.email}`);
+      console.log(`Fetching from pin: ${pin}}`);
       
       try {
-        const res = await fetch(`https://iwqd.onrender.com/${pin}?user=${currentUser.email}`);
+        const res = await fetch(`https://iwqd.onrender.com/${pin}`);
         const data = await res.json();
         console.log(`Response for ${pin}:`, data);
         const val = parseFloat(data.value);
