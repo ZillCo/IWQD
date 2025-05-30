@@ -192,6 +192,7 @@
       <div>
         <div id="menuPanel" class="menu-panel">
           <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button><br>
+          <button onclick="toggleGraphType()">📊 Toggle Chart Type</button>
         </div>
       </div>
     </header>
@@ -352,10 +353,6 @@
       });
       applyChartTheme();
     }
-    // Initialize all charts at load
-    endpoints.forEach(sensor => {
-      charts[sensor.pin] = createCharts(sensor.chartId, sensor.label, sensor.maxY);
-    });
     
     function toggleGraphType() {
       chartType = chartType === 'line' ? 'bar' : 'line';
