@@ -265,9 +265,11 @@
       { pin: "v4", chartId: "tdsChart", statusId: "tdsStatus", label: "TDS", safe: [0, 500], maxY: 1000 },
       { pin: "v5", chartId: "doChart", statusId: "doStatus", label: "DO", safe: [6.5, 8], maxY: 14 }
     ];
-
     const charts = {};
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
+
+    console.log("Website loaded");
+
     // Load dark mode state on page load
     window.onload = () => {
       darkMode = localStorage.getItem("darkMode") === "true";
