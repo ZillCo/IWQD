@@ -92,7 +92,7 @@ app.get('/api/latest/:pin', async (req, res) => {
   .exec();
     console.log('latestData:', latestData);
 
-    if (!latest || latestData[field] === undefined) {
+    if (!latestData || latestData[field] === undefined) {
       return res.status(404).json({ error: 'No data found for this pin' });
     }
 
