@@ -462,7 +462,9 @@
   el.textContent = "Loading...";
   el.style.color = "gray";
 }
-
+  fetch('https://iwqd.onrender.com/api/ping')
+  .then(res => res.json())
+  .then(console.log);
   </script>
 </body>
 </html>
