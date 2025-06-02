@@ -287,9 +287,6 @@
       darkMode = localStorage.getItem("darkMode") === "true";
       if (darkMode) document.body.classList.add("dark-mode");
       initDashboard();
-      createCharts();
-      updateCharts();
-      updateSummaryStats();
       
       setInterval(() => {
         updateCharts();
@@ -301,12 +298,13 @@
       document.getElementById("dashboard").classList.remove("hidden");
       fetchSensorData();
       createCharts();
-      updateCharts();
-      
-      setInterval(() => {
-        updateCharts();
-        updateSummaryStats();
-      }, 10000);
+  updateCharts();
+  updateSummaryStats();
+  
+  setInterval(() => {
+    updateCharts();
+    updateSummaryStats();
+  }, 10000);
     }
     function fetchSensorData() {
       console.log("Fetching initial sensor data...");// Optional: Fetch and display data here
