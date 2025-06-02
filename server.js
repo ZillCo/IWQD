@@ -102,7 +102,8 @@ app.get('/api/latest/:pin', async (req, res) => {
 app.get('/api/latest-data', async (req, res) => {
   const latest = await SensorData.findOne().sort({ timestamp: -1 });
   if (!latest) return res.status(404).json({ message: 'No data' });
-
+  
+    // Determine if water is safe based on your thresholds
   const isSafe =
     latest.pH >= 6.5 && latest.pH <= 8.5 &&
     latest.temperature >= 20 && latest.temperature <= 35 &&
@@ -116,12 +117,12 @@ app.get('/api/latest-data', async (req, res) => {
 // Manual sensor data post
 app.post('/api/data', async (req, res) => {
   try {
-    const { pH, temperature, turbidity, tds, do: doValue, alert } = req.body;
+    const { pH, temperature, turbidity, tds, DO, alert } = req.body;
 
     if (
       ph === undefined || temp === undefined ||
       turb === undefined || tds === undefined ||
-      doValue === undefined || alert === undefined
+      DO === undefined || alert === undefined
     ) {
       return res.status(400).json({ message: 'Missing fields' });
     }
@@ -134,7 +135,7 @@ app.post('/api/data', async (req, res) => {
       temperature: temp,
       turbidity: turb,
       tds,
-      DO: doValue,
+      DO,
       alert,
       timestamp: new Date()
     });
