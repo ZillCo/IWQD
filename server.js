@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const path = require('path');
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 // MongoDB URL
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -15,8 +15,7 @@ const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mo
 // Middleware
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'index.html')));
-app.use(express.static("index.html"));// HTML is inside /public
+app.use(express.static(path.join(__dirname, 'index.html'))); // HTML is inside /public
 
 app.use(
   helmet({
@@ -53,6 +52,7 @@ const sensorDataSchema = new mongoose.Schema({
   turbidity: Number,
   tds: Number,
   DO: Number,
+  alert: String,
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -66,7 +66,7 @@ app.get('/api/ping', (req, res) => {
 
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
-  const user = req.query.user || 'ESP32';
+  const user = req.query.user || 'default';
 
   const pinFieldMap = {
     'v1': 'pH',
@@ -155,7 +155,7 @@ app.post('/api/data', async (req, res) => {
 
 // Get data history
 app.get('/api/history', async (req, res) => {
-  const user = req.query.user;
+  const user = req.query.user || 'default';
   const history = await SensorData.find({ user }).sort({ timestamp: -1 }).limit(100);
   res.json(history);
 });
