@@ -22,7 +22,15 @@ app.use(
     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   })
 );
-app.use(cors({ origin: 'https://zillco.github.io', credentials: true }));
+app.use(cors({
+  origin: 'https://zillco.github.io',  // allow your frontend
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
+app.get('/api/ping', (req, res) => {
+  res.json({ message: 'pong' });
+});
 
 // Check env variables
 if (!MONGO_URL) {
