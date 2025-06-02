@@ -380,7 +380,7 @@
       });
     }
     async function fetchSensor(pin, chart, statusEl, safeRange) {
-      console.log(`Fetching from pin: ${pin}}`);
+      console.log(`Fetching from pin: ${pin}`);
       
       try {
         const res = await fetch(`https://iwqd.onrender.com/api/latest/${pin}`);
@@ -393,7 +393,7 @@
           chart.data.labels.shift();
           chart.data.datasets[0].data.shift();
         }
-        chart.data.labels.push(now);
+        chart.data.labels.push(time);
         chart.data.datasets[0].data.push(val);
         chart.update();
         
