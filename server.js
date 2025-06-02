@@ -102,11 +102,24 @@ app.get('/api/latest-data', async (req, res) => {
 // Manual sensor data post
 app.post('/api/data', async (req, res) => {
   try {
-    const { pH, temperature, turbidity, tds, DO } = req.body;
+    const { user, pin, value } = req.body;
 
-    if (!pH || !temperature || !turbidity || !tds || !DO) {
-      return res.status(400).json({ message: 'Missing fields' });
-    }
+    // Example: convert 'value' to the right field
+  const payload = {
+    user,
+    pin,
+    timestamp: new Date()
+  };
+
+  if (pin === "v1") payload.pH = value;
+  else if (pin === "v2") payload.temp = value;
+  else if (pin === "v3") payload.turb = value;
+  else if (pin === "v4") payload.tds = value;
+  else if (pin === "v5") payload.do = value;
+
+  await db.collection("sensor_data").insertOne(payload);
+  res.sendStatus(200);
+    );
     const newData = new SensorData({
       pH,
       temperature,
@@ -122,7 +135,8 @@ app.post('/api/data', async (req, res) => {
     console.error('Error saving sensor data:', error);
     res.status(500).json({ message: 'Server error' });
   }
-});
+};
+
 // Get data history
 app.get('/api/history', async (req, res) => {
   const user = req.query.user || 'default';
