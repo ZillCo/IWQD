@@ -59,9 +59,15 @@ app.get('/', (req, res) =>{
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
   const user = req.query.user || 'default';
+  
+  console.log(`🔎 Fetching data for pin: ${pin}, user: ${user}`);
 
   try {
     const response = await axios.get(`${BLYNK_API}/get?token=${BLYNK_TOKEN}&${pin}`);
+    if (!response.data || isNaN(response.data)) {
+      return res.status(400).json({ error: 'Invalid sensor data received from Blynk' });
+    }
+    
     const value = parseFloat(response.data); // for single pin reading like v1
 
     let sensorFields = {};
@@ -72,14 +78,24 @@ app.get('/api/latest/:pin', async (req, res) => {
       case 'v3': sensorFields.turbidity = value; break;
       case 'v4': sensorFields.tds = value; break;
       case 'v5': sensorFields.DO = value; break;
-      default: return res.status(400).json({ error: 'Unknown pin' });
+      default:
+        console.warn(`⚠️ Unknown pin received: ${pin}`);
+        return res.status(400).json({ error: 'Unknown pin' });
     }
     
     const timestamp = new Date();
-    await SensorData.create({ user, pin, ...sensorFields, timestamp });
+    const data = await SensorData.create({ user, pin, ...sensorFields, timestamp });
     
+    console.log(`✅ Sensor data saved for ${pin}:`, data);
     res.json({ user, pin, ...sensorFields, timestamp });
+    
   } catch (err) {
+    console.error(`❌ Error fetching data for ${pin}:`, err.message);
+
+    if (err.response && err.response.status === 403) {
+      return res.status(403).json({ error: 'Forbidden - Blynk rejected the request', detail: err.message });
+    }
+    
     res.status(500).json({ error: 'Failed to get or save sensor data', detail: err.message });
   }
 });
