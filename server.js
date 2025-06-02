@@ -90,7 +90,6 @@ app.get('/api/latest/:pin', async (req, res) => {
   .sort({ timestamp: -1 })
   .select(`${field} timestamp`)
   .exec();
-
     
     if (!latest || latest[field] === undefined) {
       return res.status(404).json({ error: 'No data found for this pin' });
@@ -98,8 +97,8 @@ app.get('/api/latest/:pin', async (req, res) => {
 
     res.json({
       pin,
-      value: latest[field],
-      timestamp: latest.timestamp
+      value: latestData[field],
+      timestamp: latestData.timestamp
     });
 
   } catch (err) {
