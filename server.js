@@ -47,22 +47,17 @@ mongoose.connect(MONGO_URL, {
 // Models
 const sensorDataSchema = new mongoose.Schema({
   user: { type: String, required: true },
-  pH: Number,
-  temperature: Number,
-  turbidity: Number,
+  ph: Number,
+  temp: Number,
+  turb: Number,
   tds: Number,
-  DO: Number,
+  do: Number,
   alert: String,
   timestamp: { type: Date, default: Date.now }
 });
 
 // Create model
 const SensorData = mongoose.model('SensorData', sensorDataSchema);
- 
-// Root health check
-app.get('/api/ping', (req, res) => {
-  res.json({ message: 'pong' });
-});
 
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
@@ -141,14 +136,16 @@ app.post('/api/data', async (req, res) => {
     
     // Example schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
 const newData = new SensorData({
-  pH: req.body.pH,
-  temperature: req.body.temperature,
-  turbidity: req.body.turbidity,
-  tds: req.body.tds,
-  DO: req.body.DO,
-  user: req.body.user || 'default',
-  timestamp: new Date()
-});
+      pH: ph,
+      temperature: tempC,
+      turbidity: turb,
+      tds: tds,
+      DO: doValue,
+      alert: alert.toString(),
+      user,
+      timestamp: new Date()
+    });
+
 await newData.save();
 
     res.status(201).json({ message: 'Sensor data saved successfully' });
