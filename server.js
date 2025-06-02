@@ -9,12 +9,13 @@ const path = require('path');
 
 const PORT = process.env.PORT;
 
-// Load environment variables
+// MongoDB URL
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Middleware
-app.use(express.static(path.join(__dirname, 'index.html')));
 app.use(express.json());
+
+app.use(express.static(path.join(__dirname, 'index.html')));
 app.use(express.static("index.html"));// HTML is inside /public
 
 app.use(
@@ -45,21 +46,24 @@ mongoose.connect(MONGO_URL, {
   .catch(err => console.error('❌ MongoDB Error:', err));
 
 // Models
-const SensorData = mongoose.model('SensorData', {
+const sensorDataSchema = new mongoose.Schema({
+  user: { type: String, required: true },
   pH: Number,
   temperature: Number,
   turbidity: Number,
   tds: Number,
   DO: Number,
-  pin: String,
-  alert: Boolean,
   timestamp: { type: Date, default: Date.now }
 });
+
+// Create model
+const SensorData = mongoose.model('SensorData', sensorDataSchema);
  
 // Root health check
-app.get('/', (req, res) =>{
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/api/ping', (req, res) => {
+  res.json({ message: 'pong' });
 });
+
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
   const user = req.query.user || 'ESP32';
@@ -87,8 +91,11 @@ app.get('/api/latest/:pin', async (req, res) => {
       return res.status(404).json({ error: 'No data found for this pin' });
     }
 
-    const value = latest[field];
-    res.json({ pin, value, timestamp: latest.timestamp });
+    res.json({
+      pin,
+      value: latest[field],
+      timestamp: latest.timestamp
+
   } catch (err) {
     console.error(`❌ Error fetching DB data for ${pin}:`, err.message);
     res.status(500).json({ error: 'Server error', detail: err.message });
@@ -147,9 +154,13 @@ app.post('/api/data', async (req, res) => {
 
 // Get data history
 app.get('/api/history', async (req, res) => {
-  const user = req.query.user || 'default';
+  const user = req.query.user;
   const history = await SensorData.find({ user }).sort({ timestamp: -1 }).limit(100);
   res.json(history);
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html')); // make sure index.html is really in root
 });
 
 // Start server
