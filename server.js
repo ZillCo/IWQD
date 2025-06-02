@@ -3,7 +3,6 @@ require('dotenv').config(); // Load variables from .env
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const axios = require('axios');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const path = require('path');
@@ -53,48 +52,42 @@ const SensorData = mongoose.model('SensorData', {
 app.get('/', (req, res) =>{
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-// Get latest from Blynk and save to DB
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
   const user = req.query.user || 'default';
-  
-  console.log(`🔎 Fetching data for pin: ${pin}, user: ${user}`);
+
+  const pinFieldMap = {
+    'v1': 'pH',
+    'v2': 'temperature',
+    'v3': 'turbidity',
+    'v4': 'tds',
+    'v5': 'DO',
+  };
+
+  const field = pinFieldMap[pin];
+  if (!field) {
+    return res.status(400).json({ error: 'Unknown pin' });
+  }
 
   try {
-    const response = await axios.get(`${BLYNK_API}/get?token=${BLYNK_TOKEN}&${pin}`);
-    if (!response.data || isNaN(response.data)) {
-      return res.status(400).json({ error: 'Invalid sensor data received from Blynk' });
-    }
-    
-    const value = parseFloat(response.data); // for single pin reading like v1
+    const latest = await SensorData.findOne({
+      user,
+      [field]: { $exists: true },
+    }).sort({ timestamp: -1 });
 
-    let sensorFields = {};
-    // Map pin to correct sensor field
-    switch (pin) {
-      case 'v1': sensorFields.pH = value; break;
-      case 'v2': sensorFields.temperature = value; break;
-      case 'v3': sensorFields.turbidity = value; break;
-      case 'v4': sensorFields.tds = value; break;
-      case 'v5': sensorFields.DO = value; break;
-      default:
-        console.warn(`⚠️ Unknown pin received: ${pin}`);
-        return res.status(400).json({ error: 'Unknown pin' });
+    if (!latest) {
+      return res.status(404).json({ error: 'No data found for this pin' });
     }
-    
-    const timestamp = new Date();
-    const data = await SensorData.create({ user, pin, ...sensorFields, timestamp });
-    
-    console.log(`✅ Sensor data saved for ${pin}:`, data);
-    res.json({ user, pin, ...sensorFields, timestamp });
-    
+
+    res.json({
+      pin,
+      value: latest[field],
+      timestamp: latest.timestamp,
+      user
+    });
   } catch (err) {
     console.error(`❌ Error fetching data for ${pin}:`, err.message);
-
-    if (err.response && err.response.status === 403) {
-      return res.status(403).json({ error: 'Forbidden - Blynk rejected the request', detail: err.message });
-    }
-    
-    res.status(500).json({ error: 'Failed to get or save sensor data', detail: err.message });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -117,28 +110,29 @@ app.get('/api/latest-data', async (req, res) => {
 // Manual sensor data post
 app.post('/api/data', async (req, res) => {
   try {
-    const { pH, temperature, turbidity, tds, DO, alert } = req.body;
-
+    const { pH, temperature, turbidity, tds, DO, alert, user = 'ESP32' } = req.body;
+    
     if (
-      ph === undefined || temp === undefined ||
-      turb === undefined || tds === undefined ||
+      pH === undefined || temperature === undefined ||
+      turbidity === undefined || tds === undefined ||
       DO === undefined || alert === undefined
     ) {
+
       return res.status(400).json({ message: 'Missing fields' });
     }
     
     const user = req.body.user || 'ESP32';
     
     const newData = new SensorData({
-      user,
-      pH: ph,
-      temperature: temp,
-      turbidity: turb,
-      tds,
-      DO,
-      alert,
-      timestamp: new Date()
-    });
+  user,
+  pH,
+  temperature,
+  turbidity,
+  tds,
+  DO,
+  alert,
+  timestamp: new Date()
+});
 
     await newData.save();
     res.status(201).json({ message: 'Sensor data saved successfully' });
