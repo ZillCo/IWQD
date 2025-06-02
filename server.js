@@ -95,6 +95,7 @@ app.get('/api/latest/:pin', async (req, res) => {
       pin,
       value: latest[field],
       timestamp: latest.timestamp
+    });
 
   } catch (err) {
     console.error(`❌ Error fetching DB data for ${pin}:`, err.message);
