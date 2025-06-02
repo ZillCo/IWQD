@@ -64,32 +64,28 @@ app.get('/api/latest/:pin', async (req, res) => {
     'v5': 'DO',
   };
 
-  const field = pinFieldMap[pin];
+  const field = fieldMap[pin];
   if (!field) {
-    return res.status(400).json({ error: 'Unknown pin' });
+    return res.status(400).json({ error: 'Invalid pin' });
   }
 
   try {
-    const latest = await SensorData.findOne({
-      user,
-      [field]: { $exists: true },
-    }).sort({ timestamp: -1 });
-
-    if (!latest) {
+    const latest = await SensorData.findOne({ user })
+      .sort({ timestamp: -1 })
+      .select(`${field} timestamp`);
+    
+    if (!latest || latest[field] === undefined) {
       return res.status(404).json({ error: 'No data found for this pin' });
     }
 
-    res.json({
-      pin,
-      value: latest[field],
-      timestamp: latest.timestamp,
-      user
-    });
+    const value = latest[field];
+    res.json({ pin, value, timestamp: latest.timestamp });
   } catch (err) {
-    console.error(`❌ Error fetching data for ${pin}:`, err.message);
-    res.status(500).json({ error: 'Server error' });
+    console.error(`❌ Error fetching DB data for ${pin}:`, err.message);
+    res.status(500).json({ error: 'Server error', detail: err.message });
   }
 });
+
 
 // Get latest saved data from DB
 app.get('/api/latest-data', async (req, res) => {
