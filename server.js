@@ -121,8 +121,6 @@ app.post('/api/data', async (req, res) => {
       return res.status(400).json({ message: 'Missing fields' });
     }
     
-    const user = req.body.user || 'ESP32';
-    
     const newData = new SensorData({
   user,
   pH,
