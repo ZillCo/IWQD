@@ -72,7 +72,7 @@ app.get('/api/latest/:pin', async (req, res) => {
     'v5': 'DO',
   };
 
-  const field = pinfieldMap[pin];
+  const field = pinFieldMap[pin];
   
   if (!field) {
     return res.status(400).json({ error: 'Invalid pin' });
