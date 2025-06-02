@@ -271,7 +271,7 @@
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
 
     pins.forEach(pin => {
-    fetch(`https://iwqd.onrender.com/api/latest/${pin}`) // ✅ correct endpoint
+    fetch(`https://iwqd.onrender.com/api/latest/${pin}`) // endpoint
       .then(response => response.json())
       .then(data => {
         console.log(`Data from ${pin}:`, data);
@@ -381,79 +381,53 @@
     }
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       console.log(`Fetching from pin: ${pin}`);
-      
       try {
         const res = await fetch(`https://iwqd.onrender.com/api/latest/${pin}`);
         const data = await res.json();
         console.log(`Response for ${pin}:`, data);
+        
+        if (!data || !data.timestamp || data.value == null) throw new Error("Invalid data");
         const val = parseFloat(data.value);
-        const time = new Date().toLocaleTimeString();
-        
-        if (chart.data.labels.length > 10) {
-          chart.data.labels.shift();
-          chart.data.datasets[0].data.shift();
-        }
-        chart.data.labels.push(time);
-        chart.data.datasets[0].data.push(val);
-        chart.update();
-        
-        averages[pin].push(val);
-        if (averages[pin].length > 20) averages[pin].shift();
-        
-        const isSafe = val >= safeRange[0] && val <= safeRange[1];
-        statusEl.textContent = isSafe ? "Safe ✅" : "Unsafe ⚠️";
-        statusEl.style.color = isSafe ? "green" : "red";
-      } catch (err) {
-        statusEl.textContent = "Error ❌";
-        statusEl.style.color = "gray";
-      }
-    }
-    function updateCharts() {
-  endpoints.forEach(({ pin, chartId, statusId, label, safe }) => {
-    fetch(`https://iwqd.onrender.com/api/latest/${pin}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data || !data.timestamp || data.value == null) return;
-
-        const value = parseFloat(data.value);
         const time = new Date(data.timestamp).toLocaleTimeString();
-
-        // Update chart dataset
-        const chart = charts[pin];
+        
+        // Update chart
         if (chart) {
           const dataset = chart.data.datasets[0];
           const labels = chart.data.labels;
-
-          // Keep only last 10 records
           if (dataset.data.length >= 10) {
             dataset.data.shift();
             labels.shift();
           }
-
           dataset.data.push(value);
           labels.push(time);
           chart.update();
         }
-
+        
         // Update averages
-        if (averages[pin]) {
-          averages[pin].push(value);
-          if (averages[pin].length > 20) averages[pin].shift(); // optional: limit
-        }
+    if (averages[pin]) {
+      averages[pin].push(value);
+      if (averages[pin].length > 20) averages[pin].shift();
+    }
 
-        // Update sensor status
-        const status = document.getElementById(statusId);
-        if (value < safe[0] || value > safe[1]) {
-          status.textContent = "⚠️ Alert!";
-          status.style.color = "red";
-        } else {
-          status.textContent = "✅ Safe";
-          status.style.color = "green";
-        }
-      })
-      .catch(err => {
-        console.error(`Error fetching ${pin}:`, err);
-      });
+    // Update status
+    if (statusEl) {
+      const isSafe = value >= safeRange[0] && value <= safeRange[1];
+      statusEl.textContent = isSafe ? "✅ Safe" : "⚠️ Alert!";
+      statusEl.style.color = isSafe ? "green" : "red";
+    }
+  } catch (err) {
+    console.error(`Error in fetchSensor for ${pin}:`, err);
+    if (statusEl) {
+      statusEl.textContent = "❌ Error";
+      statusEl.style.color = "gray";
+    }
+  }
+}
+    function updateCharts() {
+  endpoints.forEach(({ pin, chartId, statusId, safe }) => {
+    const chart = charts[pin];
+    const statusEl = document.getElementById(statusId);
+    fetchSensor(pin, chart, statusEl, safe);
   });
 }
 
