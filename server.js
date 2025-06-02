@@ -107,14 +107,10 @@ app.post('/api/data', async (req, res) => {
     if (!pH || !temperature || !turbidity || !tds || !DO) {
       return res.status(400).json({ message: 'Missing fields' });
     }
-    const newData = new SensorData({
-      pH,
-      temperature,
-      turbidity,
-      tds,
-      DO,
-      timestamp: new Date()
-    });
+    const user = req.body.user || 'default';
+const newData = new SensorData({
+  user, pH, temperature, turbidity, tds, DO, timestamp: new Date()
+});
 
     await newData.save();
     res.status(201).json({ message: 'Sensor data saved successfully' });
