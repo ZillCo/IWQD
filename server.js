@@ -54,7 +54,7 @@ app.get('/', (req, res) =>{
 });
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
-  const user = req.query.user || 'default';
+  const user = req.query.user || 'ESP32';
 
   const pinFieldMap = {
     'v1': 'pH',
