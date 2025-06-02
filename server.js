@@ -12,8 +12,6 @@ const PORT = process.env.PORT;
 
 // Load environment variables
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-const BLYNK_TOKEN ="vIgDeoNfAkR6K1KaqGa4f1H8Zl7JWi4M";
-const BLYNK_API = 'https://blynk.cloud/external/api/get?token=vIgDeoNfAkR6K1KaqGa4f1H8Zl7JWi4M&v=ph';
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'index.html')));
@@ -28,8 +26,8 @@ app.use(
 app.use(cors({ origin: 'https://zillco.github.io', credentials: true }));
 
 // Check env variables
-if (!MONGO_URL || !BLYNK_TOKEN) {
-  console.error('❌ Missing MONGO_URL or BLYNK_TOKEN in environment');
+if (!MONGO_URL) {
+  console.error('❌ Missing MONGO_URL in environment');
   process.exit(1);
 }
 // Connect to MongoDB
@@ -41,14 +39,14 @@ mongoose.connect(MONGO_URL, {
 
 // Models
 const SensorData = mongoose.model('SensorData', {
-  user: String,
   pH: Number,
   temperature: Number,
   turbidity: Number,
   tds: Number,
   DO: Number,
   pin: String,
-  timestamp: Date
+  alert: Boolean,
+  timestamp: { type: Date, default: Date.now }
 });
  
 // Root health check
@@ -118,15 +116,28 @@ app.get('/api/latest-data', async (req, res) => {
 // Manual sensor data post
 app.post('/api/data', async (req, res) => {
   try {
-    const { pH, temperature, turbidity, tds, DO } = req.body;
+    const { pH, temperature, turbidity, tds, do: doValue, alert } = req.body;
 
-    if (!pH || !temperature || !turbidity || !tds || !DO) {
+    if (
+      ph === undefined || temp === undefined ||
+      turb === undefined || tds === undefined ||
+      doValue === undefined || alert === undefined
+    ) {
       return res.status(400).json({ message: 'Missing fields' });
     }
-    const user = req.body.user || 'default';
-const newData = new SensorData({
-  user, pH, temperature, turbidity, tds, DO, timestamp: new Date()
-});
+    
+    const user = req.body.user || 'ESP32';
+    
+    const newData = new SensorData({
+      user,
+      pH: ph,
+      temperature: temp,
+      turbidity: turb,
+      tds,
+      DO: doValue,
+      alert,
+      timestamp: new Date()
+    });
 
     await newData.save();
     res.status(201).json({ message: 'Sensor data saved successfully' });
