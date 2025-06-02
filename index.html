@@ -409,10 +409,54 @@
       }
     }
     function updateCharts() {
-      endpoints.forEach(({ pin, chartId, statusId, safe }) => {
-        fetchSensor(pin, charts[pin], document.getElementById(statusId), safe);
+  endpoints.forEach(({ pin, chartId, statusId, label, safe }) => {
+    fetch(`https://iwqd.onrender.com/api/latest/${pin}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data || !data.timestamp || data.value == null) return;
+
+        const value = parseFloat(data.value);
+        const time = new Date(data.timestamp).toLocaleTimeString();
+
+        // Update chart dataset
+        const chart = charts[pin];
+        if (chart) {
+          const dataset = chart.data.datasets[0];
+          const labels = chart.data.labels;
+
+          // Keep only last 10 records
+          if (dataset.data.length >= 10) {
+            dataset.data.shift();
+            labels.shift();
+          }
+
+          dataset.data.push(value);
+          labels.push(time);
+          chart.update();
+        }
+
+        // Update averages
+        if (averages[pin]) {
+          averages[pin].push(value);
+          if (averages[pin].length > 20) averages[pin].shift(); // optional: limit
+        }
+
+        // Update sensor status
+        const status = document.getElementById(statusId);
+        if (value < safe[0] || value > safe[1]) {
+          status.textContent = "⚠️ Alert!";
+          status.style.color = "red";
+        } else {
+          status.textContent = "✅ Safe";
+          status.style.color = "green";
+        }
+      })
+      .catch(err => {
+        console.error(`Error fetching ${pin}:`, err);
       });
-    }
+  });
+}
+
     function updateSummaryStats() {
       document.getElementById("avgPh").textContent = avg(averages.v1).toFixed(2);
       document.getElementById("avgTemp").textContent = avg(averages.v2).toFixed(2);
