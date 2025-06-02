@@ -383,11 +383,11 @@
       console.log(`Fetching from pin: ${pin}}`);
       
       try {
-        const res = await fetch(`https://iwqd.onrender.com/${pin}`);
+        const res = await fetch(`https://iwqd.onrender.com/api/latest/${pin}`);
         const data = await res.json();
         console.log(`Response for ${pin}:`, data);
         const val = parseFloat(data.value);
-        const time = new Date(data.created_at);
+        const time = new Date().toLocaleTimeString();
         
         if (chart.data.labels.length > 10) {
           chart.data.labels.shift();
