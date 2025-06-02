@@ -123,30 +123,29 @@ app.get('/api/latest-data', async (req, res) => {
 // Manual sensor data post
 app.post('/api/data', async (req, res) => {
   try {
-    const { pH, temperature, turbidity, tds, DO, alert, user = 'ESP32' } = req.body;
+    const { ph, temp, turb, tds, do: dissolvedOxygen, alert, user = 'ESP32' } = req.body;
     
     if (
       pH === undefined || temperature === undefined ||
       turbidity === undefined || tds === undefined ||
-      DO === undefined || alert === undefined
+      dissolvedOxygen === undefined || alert === undefined
     ) {
-
       return res.status(400).json({ message: 'Missing fields' });
     }
     
     // Example schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
 const newData = new SensorData({
-      pH: ph,
-      temperature: tempC,
-      turbidity: turb,
-      tds: tds,
-      DO: doValue,
-      alert: alert.toString(),
+      pH: ph,              // map ph -> pH
+      temperature: temp,   // map temp -> temperature
+      turbidity: turb,     // map turb -> turbidity
+      tds: tds,            // tds as is
+      DO: dissolvedOxygen, // do -> DO
+      alert: alert.toString(),  // convert alert (bool) to string
       user,
       timestamp: new Date()
     });
 
-await newData.save();
+    await newData.save();
 
     res.status(201).json({ message: 'Sensor data saved successfully' });
   } catch (error) {
