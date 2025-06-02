@@ -379,6 +379,8 @@
         chart.update();
       });
     }
+    showLoading(statusId);
+
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       console.log(`Fetching from pin: ${pin}`);
       try {
@@ -448,13 +450,19 @@
         
         data.forEach(item => {
           const li = document.createElement("li");
-          li.textContent = `Time: ${item.time}, pH: ${item.v1}, Temp: ${item.v2}, Turb: ${item.v3}, TDS: ${item.v4}, DO: ${item.v5}`;
+          li.textContent = `Time: ${item.time}, pH: ${parseFloat(item.v1)}, Temp: ${parseFloat(item.v2)}, Turb: ${parseFloat(item.v3)}, TDS: ${parseFloat(item.v4)}, DO: ${parseFloat(item.v5)}`;
           list.appendChild(li);
         });
       } catch (err) {
         alert("Failed to load history.");
       }
     }
+    function showLoading(statusId) {
+  const el = document.getElementById(statusId);
+  el.textContent = "Loading...";
+  el.style.color = "gray";
+}
+
   </script>
 </body>
 </html>
