@@ -267,9 +267,19 @@
       { pin: "v5", chartId: "doChart", statusId: "doStatus", label: "DO", safe: [6.5, 8], maxY: 14 }
     ];
     const charts = {};
+    const pins = ['v1', 'v2', 'v3', 'v4', 'v5'];
     const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
 
-    
+    pins.forEach(pin => {
+    fetch(`https://iwqd.onrender.com/api/latest/${pin}`) // ✅ correct endpoint
+      .then(response => response.json())
+      .then(data => {
+        console.log(`Data from ${pin}:`, data);
+      })
+      .catch(err => {
+        console.error(`Error fetching ${pin}:`, err);
+      });
+  });
 
     // Load dark mode state on page load
     window.onload = () => {
