@@ -83,9 +83,14 @@ app.get('/api/latest/:pin', async (req, res) => {
   }
 
   try {
-    const latest = await SensorData.findOne({ user })
-      .sort({ timestamp: -1 })
-      .select(`${field} timestamp`);
+    const latestData = await SensorData.findOne({ 
+    user,
+    [field]: { $exists: true, $ne: null } 
+  })
+  .sort({ timestamp: -1 })
+  .select(`${field} timestamp`)
+  .exec();
+
     
     if (!latest || latest[field] === undefined) {
       return res.status(404).json({ error: 'No data found for this pin' });
@@ -134,18 +139,18 @@ app.post('/api/data', async (req, res) => {
       return res.status(400).json({ message: 'Missing fields' });
     }
     
-    const newData = new SensorData({
-  user,
-  pH,
-  temperature,
-  turbidity,
-  tds,
-  DO,
-  alert,
+    // Example schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
+const newData = new SensorData({
+  pH: req.body.pH,
+  temperature: req.body.temperature,
+  turbidity: req.body.turbidity,
+  tds: req.body.tds,
+  DO: req.body.DO,
+  user: req.body.user || 'default',
   timestamp: new Date()
 });
+await newData.save();
 
-    await newData.save();
     res.status(201).json({ message: 'Sensor data saved successfully' });
   } catch (error) {
     console.error('Error saving sensor data:', error);
