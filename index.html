@@ -386,43 +386,41 @@
         const data = await res.json();
         console.log(`Response for ${pin}:`, data);
         
-        if (!data || !data.timestamp || data.value == null) throw new Error("Invalid data");
-        const val = parseFloat(data.value);
+        // Dynamically find the value key (excluding known non-value keys)
+        const valueKey = Object.keys(data).find(
+          key => !['user', 'pin', 'timestamp'].includes(key)
+        );
+        
+        const val = parseFloat(data[valueKey]);
+        if (isNaN(val)) throw new Error("Invalid data");
+        
         const time = new Date(data.timestamp).toLocaleTimeString();
         
         // Update chart
-        if (chart) {
-          const dataset = chart.data.datasets[0];
-          const labels = chart.data.labels;
-          if (dataset.data.length >= 10) {
-            dataset.data.shift();
-            labels.shift();
-          }
-          dataset.data.push(value);
-          labels.push(time);
-          chart.update();
-        }
+       if (chart.data.labels.length > 10) {
+         chart.data.labels.shift();
+         chart.data.datasets[0].data.shift();
+       }
+        chart.data.labels.push(time);
+        chart.data.datasets[0].data.push(val);
+        chart.update();
         
         // Update averages
-    if (averages[pin]) {
-      averages[pin].push(value);
-      if (averages[pin].length > 20) averages[pin].shift();
-    }
+        averages[pin].push(val);
+        if (averages[pin].length > 20) averages[pin].shift();
 
     // Update status
-    if (statusEl) {
-      const isSafe = value >= safeRange[0] && value <= safeRange[1];
-      statusEl.textContent = isSafe ? "✅ Safe" : "⚠️ Alert!";
-      statusEl.style.color = isSafe ? "green" : "red";
-    }
+        const isSafe = val >= safeRange[0] && val <= safeRange[1];
+    statusEl.textContent = isSafe ? "Safe ✅" : "Unsafe ⚠️";
+    statusEl.style.color = isSafe ? "green" : "red";
+
   } catch (err) {
     console.error(`Error in fetchSensor for ${pin}:`, err);
-    if (statusEl) {
-      statusEl.textContent = "❌ Error";
-      statusEl.style.color = "gray";
-    }
+    statusEl.textContent = "Error ❌";
+    statusEl.style.color = "gray";
   }
 }
+
     function updateCharts() {
   endpoints.forEach(({ pin, chartId, statusId, safe }) => {
     const chart = charts[pin];
