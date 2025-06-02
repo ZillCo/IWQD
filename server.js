@@ -13,7 +13,7 @@ const PORT = process.env.PORT;
 // Load environment variables
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const BLYNK_TOKEN ="vIgDeoNfAkR6K1KaqGa4f1H8Zl7JWi4M";
-const BLYNK_API = 'https://blynk.cloud/external/api';
+const BLYNK_API = 'https://blynk.cloud/external/api/get?token=vIgDeoNfAkR6K1KaqGa4f1H8Zl7JWi4M&v=ph';
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'index.html')));
