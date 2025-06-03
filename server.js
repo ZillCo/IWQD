@@ -126,20 +126,11 @@ app.get('/api/latest-data', async (req, res) => {
 });
 
 // Manual sensor data post
-app.post('/api/data', async (req, res) => {
-    console.log("Incoming data:", req.body); // 👈 this line
-  try {
-    const {
-      ph,
-      temp,
-      turb,
-      tds,
-      DO: dissolvedOxygen,
-      alert,
-      user = 'default'
-    } = req.body;
-    
-    if (
+app.post('/api/sensordata', async (req, res) => {
+  const { user, ph, temp, turb, tds, do: DO, alert } = req.body;
+  console.log("Incoming data:", req.body); // 👈 this line
+  
+   if (
       ph === undefined || temp === undefined ||
       turb === undefined || tds === undefined ||
       dissolvedOxygen === undefined || alert === undefined
@@ -148,19 +139,20 @@ app.post('/api/data', async (req, res) => {
     }
     
     // Example schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
-const newData = new SensorData({
+  try {
+    const newData = new SensorData({
       ph: ph,              // map ph -> pH
       temp: temp,   // map temp -> temperature
       turb: turb,     // map turb -> turbidity
       tds: tds,            // tds as is
-      do: dissolvedOxygen, // do -> DO
+      do: DO, // do -> DO
       alert: alert.toString(),  // convert alert (bool) to string
       user,
       timestamp: new Date()
     });
 
     await newData.save();
-
+    console.log('✅ Saved new sensor data:', newData);
     res.status(201).json({ message: 'Sensor data saved successfully' });
   } catch (error) {
     console.error('Error saving sensor data:', error);
@@ -171,7 +163,7 @@ const newData = new SensorData({
 // Get data history
 app.get('/api/history', async (req, res) => {
   const user = req.query.user || 'default';
-  const history = await SensorData.find({ user }).sort({ timestamp: -1 }).limit(100);
+  const history = await SensorData.findOne({ user:"default" }).sort({ timestamp: -1 }).limit(100);
   res.json(history);
 });
 
