@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
 
 // MongoDB URL
-const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/Cluster0?retryWrites=true&w=majority&appName=Cluster0";
 
 // Middleware
 app.use(express.json());
@@ -137,11 +137,11 @@ app.get('/api/latest-data', async (req, res) => {
   
     // Determine if water is safe based on your thresholds
   const isSafe =
-    latest.ph >= 6.5 && latest.pH <= 8.5 &&
+    latest.ph >= 6.5 && latest.ph <= 8.5 &&
     latest.temp >= 20 && latest.temp <= 35 &&
     latest.turb <= 5 &&
     latest.tds <= 500 &&
-    latest.DO >= 6.5 && latest.DO <= 8.5;
+    latest.do >= 6.5 && latest.do <= 8.5;
 
   res.json({ ...latest.toObject(), status: isSafe ? 'Safe' : 'Unsafe' });
 });
@@ -149,8 +149,8 @@ app.get('/api/latest-data', async (req, res) => {
 // Get data history
 app.get('/api/history', async (req, res) => {
   try {
-    const latest = await SensorData.findOne().sort({ timestamp: -1 });
-    res.json(latest || {});
+    const history = await SensorData.find({}).sort({ timestamp: -1 }).limit(100);
+    res.json(history);
   } catch (err) {
     console.error('❌ Error retrieving history:', err);
     res.status(500).json({ message: 'Failed to retrieve data' });
