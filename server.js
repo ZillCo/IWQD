@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
 
 // MongoDB URL
-const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/Cluster0?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/iot_dashboard?retryWrites=true&w=majority&appName=Cluster0";
 
 // Middleware
 app.use(express.json());
