@@ -122,12 +122,21 @@ app.get('/api/latest-data', async (req, res) => {
 
 // Manual sensor data post
 app.post('/api/data', async (req, res) => {
+    console.log("Incoming data:", req.body); // 👈 this line
   try {
-    const { ph, temp, turb, tds, do: dissolvedOxygen, alert, user = 'ESP32' } = req.body;
+    const {
+      ph,
+      temp,
+      turb,
+      tds,
+      do: dissolvedOxygen,
+      alert,
+      user = 'default'
+    } = req.body;
     
     if (
-      pH === undefined || temperature === undefined ||
-      turbidity === undefined || tds === undefined ||
+      ph === undefined || temp === undefined ||
+      turb === undefined || tds === undefined ||
       dissolvedOxygen === undefined || alert === undefined
     ) {
       return res.status(400).json({ message: 'Missing fields' });
