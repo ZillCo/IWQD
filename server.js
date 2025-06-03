@@ -86,7 +86,7 @@ app.post('/api/sensordata', async (req, res) => {
 });
 
 app.get('/api/latest/:pin', async (req, res) => {
-  const pin = req.params.pin;
+  const { pin } = req.params;
   const user = req.query.user || 'default';
 
   const pinFieldMap = {
@@ -105,7 +105,7 @@ app.get('/api/latest/:pin', async (req, res) => {
 
   try {
     const latestData = await SensorData.findOne({ 
-    user,
+    pin,
     [field]: { $exists: true, $ne: null } 
   })
   .sort({ timestamp: -1 })
