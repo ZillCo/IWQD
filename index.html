@@ -204,7 +204,6 @@
         <li><strong>Average Temp (°C):</strong> <span id="avgTemp">-</span></li>
         <li><strong>Average Turbidity:</strong> <span id="avgTurb">-</span></li>
         <li><strong>Average TDS:</strong> <span id="avgTds">-</span></li>
-        <li><strong>Average DO:</strong> <span id="avgDo">-</span></li>
       </ul>
     </div>
 
@@ -244,11 +243,6 @@
             <canvas id="tdsChart"></canvas>
             Status: <span id="tdsStatus">Loading...</span>
           </div>
-          <div class="sensor-box" style="width: 100%;">
-            <h3>Dissolved Oxygen (mg/L)</h3>
-            <canvas id="doChart"></canvas>
-            Status: <span id="doStatus">Loading...</span>
-          </div>
         </div>
       </div>
     </div>
@@ -264,11 +258,10 @@
       { pin: "v2", chartId: "tempChart", statusId: "tempStatus", label: "Temp (°C)", safe: [20, 25.5], maxY: 40 },
       { pin: "v3", chartId: "turbChart", statusId: "turbStatus", label: "Turbidity", safe: [0, 1.5], maxY: 5 },
       { pin: "v4", chartId: "tdsChart", statusId: "tdsStatus", label: "TDS", safe: [0, 500], maxY: 1000 },
-      { pin: "v5", chartId: "doChart", statusId: "doStatus", label: "DO", safe: [6.5, 8], maxY: 14 }
     ];
     const charts = {};
     const pins = ['v1', 'v2', 'v3', 'v4', 'v5'];
-    const averages = { v1: [], v2: [], v3: [], v4: [], v5: [] };
+    const averages = { v1: [], v2: [], v3: [], v4: [] };
 
     pins.forEach(pin => {
     fetch(`https://iwqd.onrender.com/api/latest/${pin}`) // endpoint
@@ -436,7 +429,6 @@
       document.getElementById("avgTemp").textContent = avg(averages.v2).toFixed(2);
       document.getElementById("avgTurb").textContent = avg(averages.v3).toFixed(2);
       document.getElementById("avgTds").textContent = avg(averages.v4).toFixed(2);
-      document.getElementById("avgDo").textContent = avg(averages.v5).toFixed(2);
     }
     function avg(arr) {
       return arr.reduce((a, b) => a + b, 0) / (arr.length || 1);
