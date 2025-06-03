@@ -6,6 +6,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 const PORT = process.env.PORT || 3000;
 
@@ -27,6 +28,7 @@ app.use(cors({
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
+app.use(bodyParser.json());
 
 app.get('/api/ping', (req, res) => {
   res.json({ message: 'pong' });
@@ -46,15 +48,17 @@ mongoose.connect(MONGO_URL, {
 
 // Models
 const sensorDataSchema = new mongoose.Schema({
-  const sensorDataSchema = new mongoose.Schema({
-  user: { type: String, required: true },
-  ph: { type: Number, min: 0, max: 14 },
-  temp: { type: Number, min: -50, max: 150 },
-  turb: { type: Number, min: 0 },
-  tds: { type: Number, min: 0 },
-  do: { type: Number, min: 0 },
-  alert: { type: String, enum: ['true', 'false'] },
-  timestamp: { type: Date, default: Date.now }
+  user: String,
+  ph: Number,
+  temp: Number,
+  turb: Number,
+  tds: Number,
+  do: Number,
+  alert: String,
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Create model
