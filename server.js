@@ -87,14 +87,13 @@ app.post('/api/sensordata', async (req, res) => {
 
 app.get('/api/latest/:pin', async (req, res) => {
   const { pin } = req.params;
-  const user = req.query.user || 'default';
-
+  
   const pinFieldMap = {
     'v1': 'ph',
     'v2': 'temp',
     'v3': 'turb',
     'v4': 'tds',
-    'v5': 'DO',
+    'v5': 'dO',
   };
 
   const field = pinFieldMap[pin];
@@ -110,9 +109,9 @@ app.get('/api/latest/:pin', async (req, res) => {
   .sort({ timestamp: -1 })
   .select(`${field} timestamp`)
   .exec();
-    console.log('latestData:', latestData);
-
-    if (!latestData || latestData[field] === undefined) {
+    console.log('📦 Found latest:', latestData);
+    
+    if (!latestData) {
       return res.status(404).json({ error: 'No data found for this pin' });
     }
 
@@ -127,7 +126,6 @@ app.get('/api/latest/:pin', async (req, res) => {
     res.status(500).json({ error: 'Server error', detail: err.message });
   }
 });
-
 
 // Get latest saved data from DB
 app.get('/api/latest-data', async (req, res) => {
