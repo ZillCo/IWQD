@@ -64,9 +64,9 @@ app.get('/api/latest/:pin', async (req, res) => {
   const user = req.query.user || 'default';
 
   const pinFieldMap = {
-    'v1': 'pH',
-    'v2': 'temperature',
-    'v3': 'turbidity',
+    'v1': 'ph',
+    'v2': 'temp',
+    'v3': 'turb',
     'v4': 'tds',
     'v5': 'DO',
   };
@@ -111,9 +111,9 @@ app.get('/api/latest-data', async (req, res) => {
   
     // Determine if water is safe based on your thresholds
   const isSafe =
-    latest.pH >= 6.5 && latest.pH <= 8.5 &&
-    latest.temperature >= 20 && latest.temperature <= 35 &&
-    latest.turbidity <= 5 &&
+    latest.ph >= 6.5 && latest.pH <= 8.5 &&
+    latest.temp >= 20 && latest.temp <= 35 &&
+    latest.turb <= 5 &&
     latest.tds <= 500 &&
     latest.DO >= 6.5 && latest.DO <= 8.5;
 
@@ -129,7 +129,7 @@ app.post('/api/data', async (req, res) => {
       temp,
       turb,
       tds,
-      do: dissolvedOxygen,
+      DO: dissolvedOxygen,
       alert,
       user = 'default'
     } = req.body;
