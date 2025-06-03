@@ -43,8 +43,11 @@ if (!MONGO_URL) {
 mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB Error:', err));
+}).then(() => {
+  console.log('✅ Connected to MongoDB');
+}).catch(err => {
+  console.error('❌ MongoDB Error:', err);
+});
 
 // Models
 const sensorDataSchema = new mongoose.Schema({
@@ -54,15 +57,33 @@ const sensorDataSchema = new mongoose.Schema({
   turb: Number,
   tds: Number,
   do: Number,
-  alert: String,
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
+  alert: Boolean,
+  timestamp: { type: Date, default: Date.now }
 });
 
 // Create model
 const SensorData = mongoose.model('SensorData', sensorDataSchema);
+
+// Manual sensor data post
+app.post('/api/sensordata', async (req, res) => {
+  const { user, ph, temp, turb, tds, do: DO, alert } = req.body;
+  
+   if ([ph, temp, turb, tds, DO].some(val => val === undefined)) {
+    console.log('❌ Incomplete data received:', req.body);
+    return res.status(400).json({ message: 'Incomplete sensor data' });
+  }
+    
+    // schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
+  try {
+    const newData = new SensorData({ user, ph, temp, turb, tds, do: DO, alert });
+    await newData.save();
+    console.log('✅ Data saved:', newData);
+    res.status(201).json({ message: 'Data saved', data: newData });
+  } catch (err) {
+    console.error('❌ Error saving data:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 app.get('/api/latest/:pin', async (req, res) => {
   const pin = req.params.pin;
@@ -125,46 +146,15 @@ app.get('/api/latest-data', async (req, res) => {
   res.json({ ...latest.toObject(), status: isSafe ? 'Safe' : 'Unsafe' });
 });
 
-// Manual sensor data post
-app.post('/api/sensordata', async (req, res) => {
-  const { user, ph, temp, turb, tds, do: DO, alert } = req.body;
-  console.log("Incoming data:", req.body); // 👈 this line
-  
-   if (
-      ph === undefined || temp === undefined ||
-      turb === undefined || tds === undefined ||
-      dissolvedOxygen === undefined || alert === undefined
-    ) {
-      return res.status(400).json({ message: 'Missing fields' });
-    }
-    
-    // Example schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
-  try {
-    const newData = new SensorData({
-      ph: ph,              // map ph -> pH
-      temp: temp,   // map temp -> temperature
-      turb: turb,     // map turb -> turbidity
-      tds: tds,            // tds as is
-      do: DO, // do -> DO
-      alert: alert.toString(),  // convert alert (bool) to string
-      user,
-      timestamp: new Date()
-    });
-
-    await newData.save();
-    console.log('✅ Saved new sensor data:', newData);
-    res.status(201).json({ message: 'Sensor data saved successfully' });
-  } catch (error) {
-    console.error('Error saving sensor data:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
 // Get data history
 app.get('/api/history', async (req, res) => {
-  const user = req.query.user || 'default';
-  const history = await SensorData.findOne({ user:"default" }).sort({ timestamp: -1 }).limit(100);
-  res.json(history);
+  try {
+    const latest = await SensorData.findOne().sort({ timestamp: -1 });
+    res.json(latest || {});
+  } catch (err) {
+    console.error('❌ Error retrieving history:', err);
+    res.status(500).json({ message: 'Failed to retrieve data' });
+  }
 });
 
 app.get('/', (req, res) => {
