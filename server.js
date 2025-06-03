@@ -46,13 +46,14 @@ mongoose.connect(MONGO_URL, {
 
 // Models
 const sensorDataSchema = new mongoose.Schema({
+  const sensorDataSchema = new mongoose.Schema({
   user: { type: String, required: true },
-  ph: Number,
-  temp: Number,
-  turb: Number,
-  tds: Number,
-  do: Number,
-  alert: String,
+  ph: { type: Number, min: 0, max: 14 },
+  temp: { type: Number, min: -50, max: 150 },
+  turb: { type: Number, min: 0 },
+  tds: { type: Number, min: 0 },
+  do: { type: Number, min: 0 },
+  alert: { type: String, enum: ['true', 'false'] },
   timestamp: { type: Date, default: Date.now }
 });
 
@@ -144,11 +145,11 @@ app.post('/api/data', async (req, res) => {
     
     // Example schema fields: pH, temperature, turbidity, tds, DO, user, timestamp
 const newData = new SensorData({
-      pH: ph,              // map ph -> pH
-      temperature: temp,   // map temp -> temperature
-      turbidity: turb,     // map turb -> turbidity
+      ph: ph,              // map ph -> pH
+      temp: temp,   // map temp -> temperature
+      turb: turb,     // map turb -> turbidity
       tds: tds,            // tds as is
-      DO: dissolvedOxygen, // do -> DO
+      do: dissolvedOxygen, // do -> DO
       alert: alert.toString(),  // convert alert (bool) to string
       user,
       timestamp: new Date()
