@@ -105,7 +105,6 @@ app.get('/api/latest/:pin', async (req, res) => {
 
   try {
     const latestData = await SensorData.findOne({ 
-    pin,
     [field]: { $exists: true, $ne: null } 
   })
   .sort({ timestamp: -1 })
