@@ -93,7 +93,7 @@ app.get('/api/latest/:pin', async (req, res) => {
     'v2': 'temp',
     'v3': 'turb',
     'v4': 'tds',
-    'v5': 'dO',
+    'v5': 'do',
   };
 
   const field = pinFieldMap[pin];
