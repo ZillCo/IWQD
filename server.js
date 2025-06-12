@@ -1,5 +1,6 @@
 require('dotenv').config(); // Load variables from .env
 
+const nodemailer = require("nodemailer");
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -9,6 +10,15 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 const PORT = process.env.PORT || 3000;
+
+// Set up email transporter (use your Gmail + app password)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.ALERT_EMAIL_USER,      // e.g. "youremail@gmail.com"
+    pass: process.env.ALERT_EMAIL_PASSWORD   // e.g. "your-app-password"
+  },
+});
 
 // MongoDB URL
 const MONGO_URL = "mongodb+srv://josephmaglaque4:Mmaglaque22@cluster0.vy5rnw7.mongodb.net/iot_dashboard?retryWrites=true&w=majority&appName=Cluster0";
@@ -78,6 +88,22 @@ app.post('/api/sensordata', async (req, res) => {
     const newData = new SensorData({ user, ph, temp, turb, tds, do: DO, alert });
     await newData.save();
     console.log('✅ Data saved:', newData);
+
+    // 🔔 Send email alert if unsafe
+    if (alert === true) {
+      const mailOptions = {
+        from: `"Water Quality Monitor" <${process.env.ALERT_EMAIL_USER}>`,
+        to: "recipient@example.com", // <-- Replace or pull from Mongo user data
+        subject: "🚨 Water Quality Alert",
+        text: `Unsafe water detected!\n\nSensor values:\n- pH: ${ph}\n- Temp: ${temp} °C\n- Turbidity: ${turb} NTU\n- TDS: ${tds} ppm\n- DO: ${DO} mg/L\n\nPlease check the dashboard immediately.`,
+      };
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("✅ Email alert sent.");
+  } catch (emailErr) {
+    console.error("❌ Email alert failed:", emailErr);
+  }
+}
     res.status(201).json({ message: 'Data saved', data: newData });
   } catch (err) {
     console.error('❌ Error saving data:', err);
