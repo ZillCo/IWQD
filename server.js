@@ -195,7 +195,40 @@ app.get('/api/history', async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html')); // make sure index.html is really in root
 });
+function sendEmail(ph, temp, turb, tds) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'your_email@gmail.com',
+      pass: 'your_app_password' // Use app-specific password, not your Gmail password
+    }
+  });
 
+  const mailOptions = {
+    from: 'your_email@gmail.com',
+    to: 'recipient_email@gmail.com',
+    subject: '🚨 Water Contamination Detected at ' + new Date().toLocaleTimeString(),
+    html: `
+      <h2>Water Quality Alert!</h2>
+      <p>One or more values are outside the safe range:</p>
+      <ul>
+        <li><strong>pH:</strong> ${ph}</li>
+        <li><strong>Temperature:</strong> ${temp}°C</li>
+        <li><strong>Turbidity:</strong> ${turb} NTU</li>
+        <li><strong>TDS:</strong> ${tds} ppm</li>
+      </ul>
+      <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+    `
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('✅ Email sent:', info.response);
+    }
+  });
+}
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
