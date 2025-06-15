@@ -11,6 +11,9 @@ const bodyParser = require('body-parser');
 
 const PORT = process.env.PORT || 3000;
 
+// For delay logic to prevent spam
+let emailSentRecently = false;
+
 // Set up email transporter (use your Gmail + app password)
 const transporter = nodemailer.createTransport({
   service: "gmail",
