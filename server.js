@@ -92,22 +92,37 @@ app.post('/api/sensordata', async (req, res) => {
     await newData.save();
     console.log('✅ Data saved:', newData);
 
+    if (
+  ph < 6.5 || ph > 8.5 ||
+  turb > 5 ||
+  temp < 15 || temp > 30 ||
+  tds > 500
+) {
+  if (!emailSentRecently) {
+    sendEmail(ph, temp, turb, tds);
+    emailSentRecently = true;
+    setTimeout(() => {
+      emailSentRecently = false;
+    }, 60000); // Wait 1 minute before sending next alert
+  }
+}
+
     // 🔔 Send email alert if unsafe
     if (alert === true) {
-const mailOptions = {
+      const mailOptions = {
   from: `"Water Quality Monitor" <${process.env.ALERT_EMAIL_USER}>`,
   to: "recipient@example.com", // 👉 Replace with actual email or user email field
   subject: "🚨 Water Quality Alert",
   text: `Unsafe water detected!
-
-Sensor values:
-- pH: ${ph}
-- Temperature: ${temp} °C
-- Turbidity: ${turb} NTU
-- TDS: ${tds} ppm
-- DO: ${DO} mg/L
-
-Please check the dashboard immediately.`,
+  
+  Sensor values:
+  - pH: ${ph}
+  - Temperature: ${temp} °C
+  - Turbidity: ${turb} NTU
+  - TDS: ${tds} ppm
+  - DO: ${DO} mg/L
+  
+  Please check the dashboard immediately.`,
 };
   try {
     await transporter.sendMail(mailOptions);
@@ -195,40 +210,42 @@ app.get('/api/history', async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html')); // make sure index.html is really in root
 });
+
 function sendEmail(ph, temp, turb, tds) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'your_email@gmail.com',
-      pass: 'your_app_password' // Use app-specific password, not your Gmail password
+      user: process.env.AEUA,
+      pass: process.env.AEP  // Use App Password, not your Gmail password
     }
   });
 
   const mailOptions = {
-    from: 'your_email@gmail.com',
-    to: 'recipient_email@gmail.com',
-    subject: '🚨 Water Contamination Detected at ' + new Date().toLocaleTimeString(),
+    from: process.env.AEUA,
+    to: process.env.USER,
+    subject: '🚨 Water Contamination Alert',
     html: `
-      <h2>Water Quality Alert!</h2>
-      <p>One or more values are outside the safe range:</p>
+      <h2>Alert: Water Quality Issue</h2>
+      <p>Detected unsafe readings:</p>
       <ul>
         <li><strong>pH:</strong> ${ph}</li>
-        <li><strong>Temperature:</strong> ${temp}°C</li>
+        <li><strong>Temperature:</strong> ${temp} °C</li>
         <li><strong>Turbidity:</strong> ${turb} NTU</li>
         <li><strong>TDS:</strong> ${tds} ppm</li>
       </ul>
-      <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+      <p>Timestamp: ${new Date().toLocaleString()}</p>
     `
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
-      console.error('Error sending email:', error);
+      console.error("❌ Email error:", error);
     } else {
-      console.log('✅ Email sent:', info.response);
+      console.log("✅ Email sent:", info.response);
     }
   });
 }
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
