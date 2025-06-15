@@ -91,12 +91,21 @@ app.post('/api/sensordata', async (req, res) => {
 
     // 🔔 Send email alert if unsafe
     if (alert === true) {
-      const mailOptions = {
-        from: `"Water Quality Monitor" <${process.env.ALERT_EMAIL_USER}>`,
-        to: "recipient@example.com", // <-- Replace or pull from Mongo user data
-        subject: "🚨 Water Quality Alert",
-        text: `Unsafe water detected!\n\nSensor values:\n- pH: ${ph}\n- Temp: ${temp} °C\n- Turbidity: ${turb} NTU\n- TDS: ${tds} ppm\n- DO: ${DO} mg/L\n\nPlease check the dashboard immediately.`,
-      };
+const mailOptions = {
+  from: `"Water Quality Monitor" <${process.env.ALERT_EMAIL_USER}>`,
+  to: "recipient@example.com", // 👉 Replace with actual email or user email field
+  subject: "🚨 Water Quality Alert",
+  text: `Unsafe water detected!
+
+Sensor values:
+- pH: ${ph}
+- Temperature: ${temp} °C
+- Turbidity: ${turb} NTU
+- TDS: ${tds} ppm
+- DO: ${DO} mg/L
+
+Please check the dashboard immediately.`,
+};
   try {
     await transporter.sendMail(mailOptions);
     console.log("✅ Email alert sent.");
