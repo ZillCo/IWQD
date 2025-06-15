@@ -372,7 +372,6 @@
         chart.update();
       });
     }
-    showLoading(statusId);
 
     async function fetchSensor(pin, chart, statusEl, safeRange) {
       console.log(`Fetching from pin: ${pin}`);
@@ -450,10 +449,10 @@
       }
     }
     function showLoading(statusId) {
-  const el = document.getElementById(statusId);
-  el.textContent = "Loading...";
-  el.style.color = "gray";
-}
+      const el = document.getElementById(statusId);
+      el.textContent = "Loading...";
+      el.style.color = "gray";
+    }
   fetch('https://iwqd.onrender.com/api/ping')
   .then(res => res.json())
   .then(console.log);
