@@ -255,8 +255,7 @@ function sendEmail(ph, temp, turb, tds) {
 
   const mailOptions = {
     from: process.env.AEUA,
-    to: alertEmailList.join(','), // Send to all collected emails
-    to: process.env.AEUA,
+    to: alertEmailList.join(',') && process.env.AEUA, // Send to all collected emails
     subject: '🚨 Water Contamination Alert',
     html: `
       <h2>Alert: Water Quality Issue</h2>
