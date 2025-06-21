@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 // For delay logic to prevent spam
 let emailSentRecently = false;
+let lastAlertData = null; // Stores last unsafe values
 
 // Set up email transporter (use your Gmail + app password)
 const transporter = nodemailer.createTransport({
@@ -92,20 +93,32 @@ app.post('/api/sensordata', async (req, res) => {
     await newData.save();
     console.log('✅ Data saved:', newData);
 
-    if (
-  ph < 6.5 || ph > 8.5 ||
-  turb > 5 ||
-  temp < 15 || temp > 30 ||
-  tds > 500
-) {
-  if (!emailSentRecently) {
+  const isUnsafe =
+    ph < 6.5 || ph > 8.5 ||
+    turb > 5 ||
+    temp < 15 || temp > 30 ||
+    tds > 500;
+  
+  // Check if values changed
+  const isDuplicate =
+    lastAlertData &&
+    lastAlertData.ph === ph &&
+    lastAlertData.temp === temp &&
+    lastAlertData.turb === turb &&
+    lastAlertData.tds === tds;
+  
+  if (isUnsafe && !isDuplicate && !emailSentRecently) {
+    setTimeout(() => {
+      lastAlertData = null;
+    }, 5 * 60 * 1000); // Clear after 5 minutes
+    
     sendEmail(ph, temp, turb, tds);
+    lastAlertData = { ph, temp, turb, tds }; // save last alert values
     emailSentRecently = true;
     setTimeout(() => {
       emailSentRecently = false;
-    }, 60000); // Wait 1 minute before sending next alert
+    }, 60000);
   }
-}
 
     // 🔔 Send email alert if unsafe
     if (alert === true) {
