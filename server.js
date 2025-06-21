@@ -13,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 
 // For delay logic to prevent spam
 let emailSentRecently = false;
+let alertEmailList = [
+  "recipient@example.com" // Default recipient
+];
 let lastAlertData = null; // Stores last unsafe values
 
 // Set up email transporter (use your Gmail + app password)
@@ -224,6 +227,23 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html')); // make sure index.html is really in root
 });
 
+app.post('/api/add-email', (req, res) => {
+  const { email } = req.body;
+
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ message: 'Invalid email' });
+  }
+
+  if (!alertEmailList.includes(email)) {
+    alertEmailList.push(email);
+    console.log("✅ Added email:", email);
+    return res.json({ message: 'Email added to alert list' });
+  } else {
+    return res.json({ message: 'Email already in list' });
+  }
+});
+
+
 function sendEmail(ph, temp, turb, tds) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -235,7 +255,7 @@ function sendEmail(ph, temp, turb, tds) {
 
   const mailOptions = {
     from: process.env.AEUA,
-    to: process.env.USER,
+    to: alertEmailList.join(','), // Send to all collected emails
     subject: '🚨 Water Contamination Alert',
     html: `
       <h2>Alert: Water Quality Issue</h2>
