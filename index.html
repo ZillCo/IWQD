@@ -412,11 +412,11 @@
          chart.data.datasets[0].data.shift();
        }
         chart.data.labels.push(time);
-        chart.data.datasets[0].data.push(finalval);
+        chart.data.datasets[0].data.push(finalVal);
         chart.update();
         
         // Update averages
-        averages[pin].push(finalval);
+        averages[pin].push(finalVal);
         if (averages[pin].length > 20) averages[pin].shift();
         
       } catch (err) {
@@ -452,11 +452,13 @@
         
         data.forEach(item => {
           const li = document.createElement("li");
-          li.textContent = `Time: ${item.time}, pH: ${parseFloat(item.v1)}, Temp: ${parseFloat(item.v2)}, Turb: ${parseFloat(item.v3)}, TDS: ${parseFloat(item.v4)}, DO: ${parseFloat(item.v5)}`;
+          const time = new Date(item.timestamp).toLocaleString();
+          li.textContent = `Time: ${time}, pH: ${item.ph}, Temp: ${item.temp} °C, Turb: ${item.turb} NTU, TDS: ${item.tds} ppm, DO: ${item.do} mg/L`;
           list.appendChild(li);
         });
       } catch (err) {
-        alert("Failed to load history.");
+        alert("Failed to load history."); 
+        console.error("❌ History error:", err);
       }
     }
     function showLoading(statusId) {
