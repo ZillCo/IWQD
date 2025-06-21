@@ -95,12 +95,24 @@ app.post('/api/sensordata', async (req, res) => {
     const newData = new SensorData({ user, ph, temp, turb, tds, do: DO, alert });
     await newData.save();
     console.log('✅ Data saved:', newData);
-
-  const isUnsafe =
-    ph < 6.5 || ph > 8.5 ||
-    turb > 5 ||
-    temp < 15 || temp > 30 ||
-    tds > 500;
+    
+    // Check if water is 0 — skip if all values are 0
+    const isNoWater =
+      ph === 0 &&
+      temp === 0 &&
+      turb === 0 &&
+      tds === 0 &&
+      DO === 0;
+    
+    if (isNoWater) {
+      console.log("💧 No water detected — skipping email alert.");
+      return res.status(200).json({ message: 'No water — data saved but no alert sent.' });
+    }
+    const isUnsafe =
+      ph < 6.5 || ph > 8.5 ||
+      turb > 5 ||
+      temp < 15 || temp > 30 ||
+      tds > 500;
   
   // Check if values changed
   const isDuplicate =
@@ -114,7 +126,7 @@ app.post('/api/sensordata', async (req, res) => {
     setTimeout(() => {
       lastAlertData = null;
     }, 5 * 60 * 1000); // Clear after 5 minutes
-    
+
     sendEmail(ph, temp, turb, tds);
     lastAlertData = { ph, temp, turb, tds }; // save last alert values
     emailSentRecently = true;
