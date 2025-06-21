@@ -387,24 +387,25 @@
         
         const val = parseFloat(data[valueKey]);
         if (isNaN(val)) throw new Error("Invalid data");
-        const time = new Date(data.timestamp).toLocaleTimeString();
+        const timeStamp = new Date(data.timestamp);
         const now = new Date();
         const timeDiff = (now - timeStamp) / 1000; // in seconds
         const isStale = timeDiff > 5; // If data is older than 10 seconds
         let finalVal = val;
 
         if (isStale || isNaN(val)) {
-      finalVal = 0;
-      statusEl.textContent = "No water 🚫";
-      statusEl.style.color = "gray";
-    } else {
-      // Update status based on safe range
-      const isSafe = finalVal >= safeRange[0] && finalVal <= safeRange[1];
-      statusEl.textContent = isSafe ? "Safe ✅" : "Unsafe ⚠️";
-      statusEl.style.color = isSafe ? "green" : "red";
-    }
-    const time = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        finalVal = 0;
+        statusEl.textContent = "No water 🚫";
+        statusEl.style.color = "gray";
+      } else {
+        // Update status based on safe range
+        const isSafe = finalVal >= safeRange[0] && finalVal <= safeRange[1];
+        statusEl.textContent = isSafe ? "Safe ✅" : "Unsafe ⚠️";
+        statusEl.style.color = isSafe ? "green" : "red";
+      }
         
+      const time = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
         // Update chart
        if (chart.data.labels.length > 10) {
          chart.data.labels.shift();
