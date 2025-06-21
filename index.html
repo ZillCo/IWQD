@@ -295,14 +295,15 @@
       document.getElementById("dashboard").classList.remove("hidden");
       fetchSensorData();
       createCharts();
-  updateCharts();
-  updateSummaryStats();
-  
-  setInterval(() => {
-    updateCharts();
-    updateSummaryStats();
-  }, 60000);
+      updateCharts();
+      updateSummaryStats();
+      
+      setInterval(() => {
+        updateCharts();
+        updateSummaryStats();
+      }, 60000);
     }
+    
     function fetchSensorData() {
       console.log("Fetching initial sensor data...");// Optional: Fetch and display data here
     }
@@ -401,6 +402,9 @@
         finalVal = 0;
         statusEl.textContent = "No water 🚫";
         statusEl.style.color = "gray";
+        averages[pin].push(finalVal);
+          if (averages[pin].length > 20) averages[pin].shift();
+        }
       } else {
         // Update status based on safe range
         const isSafe = finalVal >= safeRange[0] && finalVal <= safeRange[1];
