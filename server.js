@@ -126,7 +126,7 @@ app.post('/api/sensordata', async (req, res) => {
     // 🔔 Send email alert if unsafe
     if (alert === true) {
       const mailOptions = {
-  from: `"Water Quality Monitor" <${process.env.ALERT_EMAIL_USER}>`,
+  from: `"Water Quality Monitor" <${process.env.AEUA}>`,
   to: "recipient@example.com", // 👉 Replace with actual email or user email field
   subject: "🚨 Water Quality Alert",
   text: `Unsafe water detected!
