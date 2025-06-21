@@ -208,6 +208,12 @@
     </div>
 
     <div class="container">
+      <div class="report-box">
+        <h3>📧 Add Email for Alerts</h3>
+        <input type="email" id="emailInput" placeholder="Enter email address" />
+        <button onclick="submitEmail()">Add Email</button>
+        <p id="emailStatus"></p>
+      </div>
       <!-- Move your history section here -->
       <div id="history">
         <div class="sensor-box">
@@ -469,6 +475,35 @@
   fetch('https://iwqd.onrender.com/api/ping')
   .then(res => res.json())
   .then(console.log);
+
+    function submitEmail() {
+  const email = document.getElementById("emailInput").value;
+  const status = document.getElementById("emailStatus");
+
+  if (!email || !email.includes("@")) {
+    status.textContent = "❌ Please enter a valid email.";
+    status.style.color = "red";
+    return;
+  }
+
+  fetch("https://iwqd.onrender.com/api/add-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  })
+  .then(res => res.json())
+  .then(data => {
+    status.textContent = "✅ " + data.message;
+    status.style.color = "green";
+    document.getElementById("emailInput").value = "";
+  })
+  .catch(err => {
+    console.error("❌ Failed to add email:", err);
+    status.textContent = "❌ Error adding email.";
+    status.style.color = "red";
+  });
+}
+
   </script>
 </body>
 </html>
