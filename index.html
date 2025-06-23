@@ -402,8 +402,6 @@
           finalVal = 0;
           statusEl.textContent = "No water 🚫";
           statusEl.style.color = "gray";
-          averages[pin].push(finalVal);
-          if (averages[pin].length > 20) averages[pin].shift();
       } else {
         // Update status based on safe range
         const isSafe = finalVal >= safeRange[0] && finalVal <= safeRange[1];
